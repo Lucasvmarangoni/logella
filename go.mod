@@ -1,4 +1,4 @@
-module github.com/Lucasvmarangoni/err-context
+module github.com/Lucasvmarangoni/errcontext
 
 go 1.21.1
 
