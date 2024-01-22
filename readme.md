@@ -1,4 +1,7 @@
-# Errcontext
+# Outros pacotes serão adicionados em breve
+
+
+## Errcontext
 
 Uma pacote de erros personalidados. Sua funcionalidade principal é adicionar informação de contexto aos erros, propagando as para cima na cadeia de chamadas. 
 

@@ -1,4 +1,4 @@
-module github.com/Lucasvmarangoni/errcontext
+module github.com/Lucasvmarangoni/logella
 
 go 1.21.1
 
