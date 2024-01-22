@@ -4,7 +4,7 @@
 
 # Logella
 
-A loggers and errors simple package.
+A simple loggers and errors library.
 
 </div>
 
