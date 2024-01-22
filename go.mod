@@ -1,4 +1,4 @@
-module github.com/Lucasvmarangoni/logella
+module logella
 
 go 1.21.1
 
