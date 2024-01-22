@@ -28,11 +28,3 @@ func ErrCtx(err error, value string) error {
 	}
 	return fmt.Errorf("%w %s: %s", e.err, key, value)
 }
-
-func IsRequiredError(fieldName, msg string) error {
-	return fmt.Errorf("%s is required. %s", fieldName, msg)
-}
-
-func IsInvalidError(fieldName, msg string) error {
-	return fmt.Errorf("%s is invalid. %s", fieldName, msg)
-}
