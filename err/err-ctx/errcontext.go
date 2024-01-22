@@ -1,4 +1,4 @@
-package errors
+package errctx
 
 import (
 	"fmt"
