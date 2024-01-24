@@ -30,6 +30,8 @@ The `Errors` package is a custom error handling library. Its primary feature is 
 
 It also provides standardized error types, such as `invalid` and `required`.
 
+![Alt text](img/errctx.png)
+
 ### Import
 ```go
 import "github.com/Lucasvmarangoni/logella/err"
@@ -72,7 +74,9 @@ errors.IsInvalidError("Customer", "Must be google uuid")
 
 ## Router Package
 
-The `Router` package is a logging library for initializing routes using go-chi.
+The `Router` is a logging package for initializing routes using go-chi.
+
+![Alt text](img/router.png)
 
 ### Import
 
