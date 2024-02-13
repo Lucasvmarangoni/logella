@@ -7,24 +7,33 @@ import (
 )
 
 type CustomError struct {
-	err   error
-	added bool
+	err        error
+	added      bool
+	operations error
 }
 
 var e *CustomError
 
-func ErrCtx(err error, value string) error {
+func ErrCtx(err error, operationValue string) error {
 	key := "Operation"
+	operation := fmt.Errorf("%s: %s", key, operationValue)
 
-	if e == nil || !e.added {
+	if e == nil {
 		e = &CustomError{
-			err:   errors.Wrap(err, "Error"),
-			added: true,
+			err:        errors.Wrap(err, "Error"),
+			added:      true,
+			operations: operation,
 		}
 	} else {
-		e = &CustomError{
-			err: errors.WithStack(err),
-		}
+		e.operations = fmt.Errorf("%w %s: %s", e.operations, key, operationValue)
+		e.err = errors.WithStack(err)
 	}
-	return fmt.Errorf("%w %s: %s", e.err, key, value)
+	return fmt.Errorf("%w", e.err)
+}
+
+func GetOperations() error {
+	if e != nil {
+		return e.operations
+	}
+	return nil
 }
