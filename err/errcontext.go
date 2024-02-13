@@ -37,3 +37,10 @@ func GetOperations() error {
 	}
 	return nil
 }
+
+func ErrStack() error {
+	if e != nil {
+		return fmt.Errorf("%w Operations: %s", e.err, e.operations)
+	}
+	return nil
+}
