@@ -20,7 +20,7 @@ func ErrCtx(err error, operationValue string) error {
 
 	if e == nil {
 		e = &CustomError{
-			err:        errors.Wrap(err, "Error"),
+			err:        err,
 			added:      true,
 			operations: operation,
 		}
