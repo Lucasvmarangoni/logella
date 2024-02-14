@@ -30,7 +30,6 @@ The `Errors` package is a custom error handling library. Its primary feature is 
 
 It also provides standardized error types, such as `invalid` and `required`.
 
-![Alt text](img/errctx.png)
 
 ### Import
 ```go
@@ -42,6 +41,9 @@ The operations stack is not returned by ErrCtx, but rather persisted.
 
 **GetOperations**: GetOperations is used to retrieve only the operations stack.
 **ErrStack**: ErrStack returns the error along with the operations stack.
+
+![Alt text](img/errctx.png)
+
 
 ### Use
 ```go
