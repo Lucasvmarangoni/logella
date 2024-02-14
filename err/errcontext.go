@@ -40,7 +40,7 @@ func GetOperations() error {
 
 func ErrStack() error {
 	if e != nil {
-		return fmt.Errorf("%w Operations: %s", e.err, e.operations)
+		return fmt.Errorf("%w | %s", e.err, e.operations)
 	}
 	return nil
 }
