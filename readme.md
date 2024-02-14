@@ -40,6 +40,7 @@ import "github.com/Lucasvmarangoni/logella/err"
 The operations stack is not returned by ErrCtx, but rather persisted. 
 
 **GetOperations**: GetOperations is used to retrieve only the operations stack.
+
 **ErrStack**: ErrStack returns the error along with the operations stack.
 
 ![Alt text](img/errctx.png)
