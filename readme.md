@@ -84,7 +84,8 @@ errors.IsInvalidError("Customer", "Must be google uuid")
 - IsInvalidError(fieldName, msg string) error
 - IsRequiredError(fieldName, msg string) error
 - FailOnErrLog(err error, msg string)
-- FailOnErrPanic(err error)  
+- PanicErr(err error, ctx string)
+- PanicBool(boolean bool, msg string)
 
 <br><br>
 
