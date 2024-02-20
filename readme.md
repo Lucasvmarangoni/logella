@@ -81,6 +81,10 @@ The package provides standardized errors, such as `IsInvalidError` and `IsRequir
 errors.IsInvalidError("Customer", "Must be google uuid")
 ```
 
+- IsInvalidError(fieldName, msg string) error
+- IsRequiredError(fieldName, msg string) error
+- FailOnErrPanic(err error)  
+
 <br><br>
 
 ## Router Package
