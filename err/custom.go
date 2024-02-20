@@ -9,3 +9,9 @@ func IsRequiredError(fieldName, msg string) error {
 func IsInvalidError(fieldName, msg string) error {
 	return fmt.Errorf("%s is invalid. %s", fieldName, msg)
 }
+
+func FailOnErrPanic(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
