@@ -13,9 +13,15 @@ func IsInvalidError(fieldName, msg string) error {
 	return fmt.Errorf("%s is invalid. %s", fieldName, msg)
 }
 
-func FailOnErrPanic(err error) {
+func PanicErr(err error, ctx string) {
 	if err != nil {
-		panic(err)
+		panic(fmt.Errorf("%w  - ctx: %s", err, ctx))
+	}
+}
+
+func PanicBool(boolean bool, msg string) {
+	if !boolean {
+		panic(msg)
 	}
 }
 
