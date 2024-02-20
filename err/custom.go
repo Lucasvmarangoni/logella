@@ -25,8 +25,8 @@ func PanicBool(boolean bool, msg string) {
 	}
 }
 
-func FailOnErrLog(err error, msg string) {
+func FailOnErrLog(err error, ctx, msg string) {
 	if err != nil {
-		log.Fatal().Err(ErrCtx(err, msg))
+		log.Fatal().Stack().Err(ErrCtx(err, ctx)).Msg(msg)
 	}
 }
