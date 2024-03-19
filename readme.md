@@ -13,6 +13,10 @@ A simple loggers and errors library.
 
 ### Packages:
 
+- <a href="#logger-package">
+   Logger
+  </a> 
+
 - <a href="#errors-package">
    Errors
   </a> 
@@ -23,6 +27,54 @@ A simple loggers and errors library.
 </div>
 
 <br><br>
+
+## Logger Package
+
+This package defines the log settings (zerolog). Allows you to use default or customized colors configuration.
+
+### Import
+```go
+import "github.com/Lucasvmarangoni/logella/config/log"
+```
+
+**ConfigDefault**: It has pre-defined log color settings, meaning there is no need to specify a any parameter.
+
+```go
+logger.ConfigDefault()
+```
+
+**ConfigCustom**: Allows you to customize log level, message, and operation colors.
+
+```go
+ConfigCustom(info, err, warn, debug, fatal, message, operation colors)
+```
+
+The parameters must be passed using the variables already defined by the package with the name of the colors.
+
+<u>Colors</u>: Black, Red, Green, Yellow, Blue, Magenta, Cyan or White.
+
+```go
+const (
+	Black = iota + 30
+	Red
+	Green
+	Yellow
+	Blue
+	Magenta
+	Cyan
+	White
+)
+```
+
+Example:
+
+
+```go
+logger.ConfigCustom(Green, Red, Yellow, Cyan, Red, Magenta, Blue)
+```
+
+<br><br>
+
 
 ## Errors Package
 
