@@ -53,19 +53,6 @@ The parameters must be passed using the variables already defined by the package
 
 <u>Colors</u>: Black, Red, Green, Yellow, Blue, Magenta, Cyan or White.
 
-```go
-const (
-	Black = iota + 30
-	Red
-	Green
-	Yellow
-	Blue
-	Magenta
-	Cyan
-	White
-)
-```
-
 Example:
 
 
