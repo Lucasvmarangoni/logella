@@ -75,24 +75,24 @@ It also provides standardized error types, such as `invalid` and `required`.
 import "github.com/Lucasvmarangoni/logella/err"
 ```
 
-**ErrCtx**: ErrCtx is used to add the error and the operation that triggered the exception. 
+**Ctx**: Ctx is used to add the error and the operation that triggered the exception. 
 The operations stack is not returned by ErrCtx, but rather persisted. 
 
 **GetOperations**: GetOperations is used to retrieve only the operations stack.
 
-**ErrStack**: ErrStack returns the error along with the operations stack.
+**Stack**: Stack returns the error along with the operations stack.
 
 ![Alt text](img/errctx.png)
 
 
 ### Use
 ```go
-errors.ErrCtx(err, "repo.InitTables")
+errors.Ctx(err, "repo.InitTables")
 errors.GetOperations()
-errors.ErrStack()
+errors.Stack()
 ```
 
-### ErrCtx(err error, value string)
+### Ctx(err error, value string)
 
 This function creates an error with context. Here are examples of how to use it:
 

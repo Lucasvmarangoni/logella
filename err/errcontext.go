@@ -14,7 +14,7 @@ type CustomError struct {
 
 var e *CustomError
 
-func ErrCtx(err error, operationValue string) error {
+func Ctx(err error, operationValue string) error {
 	key := "Operation"
 	operation := fmt.Errorf("%s: %s", key, operationValue)
 
@@ -38,7 +38,7 @@ func GetOperations() error {
 	return nil
 }
 
-func ErrStack() error {
+func Stack() error {
 	if e != nil {
 		return fmt.Errorf("%w | %s", e.err, e.operations)
 	}
