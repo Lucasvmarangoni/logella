@@ -1,4 +1,4 @@
-package errors
+package err
 
 import (
 	"fmt"
@@ -27,6 +27,6 @@ func PanicBool(boolean bool, msg string) {
 
 func FailOnErrLog(err error, ctx, msg string) {
 	if err != nil {
-		log.Fatal().Stack().Err(ErrCtx(err, ctx)).Msg(msg)
+		log.Fatal().Stack().Err(Ctx(err, ctx)).Msg(msg)
 	}
 }
