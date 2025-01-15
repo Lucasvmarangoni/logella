@@ -63,9 +63,9 @@ logger.ConfigCustom(Green, Red, Yellow, Cyan, Red, Magenta, Blue)
 <br><br>
 
 
-## Errors Package
+## Errs Package
 
-The `Errors` package is a custom error handling library. Its primary feature is to attach contextual information to errors, allowing them to be propagated up the call stack. 
+The `Errs` package is a custom error handling library. Its primary feature is to attach contextual information to errors, allowing them to be propagated up the call stack. 
 
 It also provides standardized error types, such as `invalid` and `required`.
 
@@ -87,9 +87,9 @@ The operations stack is not returned by ErrCtx, but rather persisted.
 
 ### Use
 ```go
-errors.Ctx(err, "repo.InitTables")
-errors.GetOperations()
-errors.Stack()
+errs.Ctx(err, "repo.InitTables")
+errs.GetOperations()
+errs.Stack()
 ```
 
 ### Ctx(err error, value string)
@@ -99,14 +99,14 @@ This function creates an error with context. Here are examples of how to use it:
 ```go
 cfg.Db, err = pgx.ParseConfig(url)
 if err != nil {
-    return nil, errors.ErrCtx(err, "pgx.ParseConfig(url)")
+    return nil, errs.Ctx(err, "pgx.ParseConfig(url)")
 }
 ```
 
 ```go
 dbConnection, err := db.Connect(ctx)
 if err != nil {
-    return nil, errors.ErrCtx(err, "db.Connect")
+    return nil, errs.Ctx(err, "db.Connect")
 }
 ```
 
@@ -117,7 +117,7 @@ The output of this function includes a field named "Operation", which is the mai
 The package provides standardized errors, such as `IsInvalidError` and `IsRequiredError`. Here's an example of how to use `IsInvalidError`:
 
 ```go
-errors.IsInvalidError("Customer", "Must be google uuid")
+errs.IsInvalidError("Customer", "Must be google uuid")
 ```
 
 - IsInvalidError(fieldName, msg string) error
