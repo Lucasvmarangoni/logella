@@ -2,35 +2,44 @@ package router
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/go-chi/chi"
 	"github.com/rs/zerolog/log"
 )
 
+type HTTPMethod int
+
+const (
+	POST HTTPMethod = iota
+	GET
+	PUT
+	PATCH
+	DELETE
+)
+
 type Router struct {
-	method        string	
-	prefix        string
+	method HTTPMethod
+	prefix string
 }
 
 func (ro *Router) InitializeRoute(r chi.Router, path string, handler http.HandlerFunc) {
 
-	switch strings.ToUpper(ro.method) {
-	case "POST":
+	switch ro.method {
+	case POST:
 		r.Post(path, handler)
-	case "GET":
+	case GET:
 		r.Get(path, handler)
-	case "PUT":
+	case PUT:
 		r.Put(path, handler)
-	case "PATCH":
+	case PATCH:
 		r.Patch(path, handler)
-	case "DELETE":
+	case DELETE:
 		r.Delete(path, handler)
 	}
 	log.Info().Str("context", "Router").Msgf("Mapped - Initialized: (%s) %s%s ", ro.method, ro.prefix, path)
 }
 
-func (ro *Router) Method(m string) *Router {
+func (ro *Router) Method(m HTTPMethod) *Router {
 	ro.method = m
 	return ro
 }
@@ -40,8 +49,7 @@ func (ro *Router) Prefix(p string) *Router {
 	return ro
 }
 
-
 func NewRouter() *Router {
-	ro := &Router{}	
+	ro := &Router{}
 	return ro
 }
