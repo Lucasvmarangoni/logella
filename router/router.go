@@ -7,14 +7,14 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type HTTPMethod int
+type HTTPMethod string
 
 const (
-	POST HTTPMethod = iota
-	GET
-	PUT
-	PATCH
-	DELETE
+	POST   HTTPMethod = "POST"
+	GET    HTTPMethod = "GET"
+	PUT    HTTPMethod = "PUT"
+	PATCH  HTTPMethod = "PATCH"
+	DELETE HTTPMethod = "DELETE"
 )
 
 type Router struct {
