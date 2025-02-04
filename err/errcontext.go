@@ -2,45 +2,60 @@ package errs
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/pkg/errors"
 )
 
-type CustomError struct {
-	err        error
+type Error struct {
+	Err        error
+	Code       int
+	Message    string
 	added      bool
 	operations error
 }
 
-var e *CustomError
+var Status = map[int]string{
+	http.StatusBadRequest:          "BadRequest",
+	http.StatusUnauthorized:        "Unauthorized",
+	http.StatusForbidden:           "Forbidden",
+	http.StatusInternalServerError: "InternalServerError",
+}
 
-func Ctx(err error, operationValue string) error {
+var E *Error
+
+func Wrap(err error, operationValue string, code int) error {
 	key := "Operation"
 	operation := fmt.Errorf("%s: %s", key, operationValue)
 
-	if e == nil {
-		e = &CustomError{
-			err:        err,
+	if E == nil {
+		E = &Error{
+			Err:        fmt.Errorf("%w", err),
+			Code:       code,
 			added:      true,
 			operations: operation,
 		}
 	} else {
-		e.operations = fmt.Errorf("%w %s: %s", e.operations, key, operationValue)
-		e.err = errors.WithStack(err)
+		E.operations = fmt.Errorf("%w %s: %s", E.operations, key, operationValue)
+		E.Err = errors.WithStack(err)
 	}
-	return fmt.Errorf("%w", e.err)
+	return E.Err
+}
+
+func Msg(message string) {
+	E.Message = message
 }
 
 func GetOperations() error {
-	if e != nil {
-		return e.operations
+	if E != nil {
+		return E.operations
 	}
 	return nil
 }
 
 func Stack() error {
-	if e != nil {
-		return fmt.Errorf("%w | %s", e.err, e.operations)
+	if E != nil {
+		return fmt.Errorf("%w | %s", E.Err, E.operations)
 	}
 	return nil
 }
