@@ -63,7 +63,7 @@ func (e *Error) Context(operationValue string) error {
 	key := "Context"
 
 	e.context = fmt.Errorf("%w; %s: %s", e.context, key, operationValue)
-	return e.Cause
+	return e
 }
 
 func (e *Error) GetContext() error {
