@@ -75,6 +75,9 @@ func (e *Error) GetContext() error {
 
 func (e *Error) Stack() error {
 	if e != nil {
+		if e.Code == 500 {
+			return fmt.Errorf("%s | %s", "Internal Server Error", e.context)
+		}
 		return fmt.Errorf("%w | %s", e.Cause, e.context)
 	}
 	return nil
