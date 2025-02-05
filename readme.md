@@ -182,15 +182,6 @@ errs.Assertion(err).Cause
 errs.Assertion(err).Message
 ```
 
-Use Case:
-Example:
-```go
-Err     := errs.Assertion(err)
-code    := errs.Assertion(err).Code
-cause   := errs.Assertion(err).Cause
-message := errs.Assertion(err).Message
-```
-
 ### Context
 
 ```go
