@@ -37,9 +37,9 @@ func init() {
 		},
 		FormatErrFieldValue: func(i interface{}) string {
 			value := failOnError(i)
-			formattedOperation := Format(instanceColorsConfig.Operation, "Operation")
+			formattedContext := Format(instanceColorsConfig.Context, "Context")
 			formattedError := Format(Red, "Error")
-			Str := strings.ReplaceAll(value, "Operation", formattedOperation)
+			Str := strings.ReplaceAll(value, "Context", formattedContext)
 			Str = strings.ReplaceAll(Str, "Error", formattedError)
 			return Str
 		},
