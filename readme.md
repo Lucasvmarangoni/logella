@@ -92,17 +92,6 @@ The operations stack is not returned by ErrCtx, but rather persisted.
 
 ![alt text](img/log.png)
 
-### Use
-```go
-errs.Wrap(err, "repo.InitTables")
-errs.Assertion(err)
-errs.Context("string")
-errs.GetContext()
-errs.Stack()
-errs.ToClint()
-errs.Msg("string")
-```
-
 ### Error Struct
 
 ```go
@@ -149,7 +138,18 @@ authdata, err := u.userService.VerifyTOTP(id, totpToken.Token)
 	}
 ```
 
-### Wrap
+### Use
+```go
+errs.Wrap(err, "repo.InitTables")
+errs.Assertion(err)
+errs.Context("string")
+errs.GetContext()
+errs.Stack()
+errs.ToClint()
+errs.Msg("string")
+```
+
+#### Wrap
 ```go
 func Wrap(cause error, contextValue string, code int) error
 ```
@@ -168,7 +168,7 @@ if err != nil {
 }
 ```
 
-### Assertion
+#### Assertion
 
 ```go
 func Assertion(err error) *Error
@@ -182,7 +182,7 @@ errs.Assertion(err).Cause
 errs.Assertion(err).Message
 ```
 
-### Context
+#### Context
 
 ```go
 func (e *Error) Context(operationValue string) error 
@@ -216,7 +216,7 @@ func main(){
 // Clint: {"level":"error","error":"Internal Server Error","time":"2025-02-05T15:53:17-03:00","message":"500"}
 ```
 
-### Stack
+#### Stack
 
 ```go
 func (e *Error) Stack() error 
@@ -243,7 +243,7 @@ authdata, err := u.userService.VerifyTOTP(id, totpToken.Token)
 	}
 ```
 
-### ToClient
+#### ToClient
 Check the Code of the error to if it is 500 return "Internal Server Error" instead of Cause (actual error)
 
 ```go
@@ -271,7 +271,7 @@ authdata, err := u.userService.VerifyTOTP(id, totpToken.Token)
 	}
 ```
 
-### Msg
+#### Msg
 
 ```go
 func (e *Error) Msg(message string) 
