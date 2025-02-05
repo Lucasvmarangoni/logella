@@ -115,19 +115,56 @@ type Error struct {
 }
 ```
 
+### Status
+
+```go
+var Status = map[int]string{
+	http.StatusBadRequest:          "BadRequest",
+	http.StatusUnauthorized:        "Unauthorized",
+	http.StatusForbidden:           "Forbidden",
+	http.StatusInternalServerError: "InternalServerError",
+	http.StatusNotFound:            "NotFound",
+}
+```
+
+Example:
+```go
+errs.Status[errs.Assertion(err).Code]
+errs.Status[http.StatusBadrequest]
+```
+
+Use Case:
+```go
+	authdata, err := u.userService.Authn(user.Email, user.Password)
+	if err != nil {
+		w.WriteHeader(errs.Assertion(err).Code)
+		json.NewEncoder(w).Encode(map[string]string{
+			"status":  errs.Status[errs.Assertion(err).Code],
+			"message": fmt.Sprintf("%v", errs.Assertion(err).ToClient()),
+		})
+		log.Error().Stack().Err(errs.Assertion(err).Stack()).Msg("Error authenticate user")
+		return
+	}
+```
+
 ### Wrap
 ```go
 func Wrap(cause error, contextValue string, code int) error
 ```
 
-*Example*:
+Example:
 ```go
+errs.Wrap(err, "pgx.ParseConfig(url)", http.InternalServerError)
+```
+
+Use case:
+```go
+errs.Wrap(err, "pgx.ParseConfig(url)", http.InternalServerError)
 cfg.Db, err = pgx.ParseConfig(url)
 if err != nil {
     return nil, errs.Wrap(err, "pgx.ParseConfig(url)", http.InternalServerError)
 }
 ```
-The output of this function includes a field named "Context", which is the main feature of this package.
 
 ### Assertion
 
