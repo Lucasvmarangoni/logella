@@ -276,7 +276,8 @@ Use Case:
 ### Msg
 
 ```go
-func (e *Error) Msg(message string) ```
+func (e *Error) Msg(message string) 
+```
 
 Example:
 ```go
