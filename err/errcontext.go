@@ -8,11 +8,18 @@ import (
 )
 
 type Error struct {
-	Err        error
+	Cause      error
 	Code       int
 	Message    string
 	added      bool
 	operations error
+}
+
+func (e *Error) Error() string {
+	if e.Code == http.StatusInternalServerError {
+		return e.Message
+	}
+	return e.Message + " : " + e.Cause.Error()
 }
 
 var Status = map[int]string{
@@ -22,40 +29,46 @@ var Status = map[int]string{
 	http.StatusInternalServerError: "InternalServerError",
 }
 
-var E *Error
-
-func Wrap(err error, operationValue string, code int) error {
+func Wrap(cause error, operationValue string, code int) error {
 	key := "Operation"
 	operation := fmt.Errorf("%s: %s", key, operationValue)
 
-	if E == nil {
-		E = &Error{
-			Err:        fmt.Errorf("%w", err),
-			Code:       code,
-			added:      true,
-			operations: operation,
+	var e *Error
+	if cause != nil {
+		var ok bool
+		if e, ok = cause.(*Error); !ok {
+			e = &Error{
+				Cause:      cause,
+				Code:       code,
+				added:      true,
+				operations: operation,
+			}
+		} else {
+			e.operations = fmt.Errorf("%w; %s: %s", e.operations, key, operationValue)
+			e.Cause = errors.Unwrap(cause)
 		}
-	} else {
-		E.operations = fmt.Errorf("%w %s: %s", E.operations, key, operationValue)
-		E.Err = errors.WithStack(err)
 	}
-	return E.Err
+	return e
 }
 
-func Msg(message string) {
-	E.Message = message
+func Assertion(err error) *Error {
+	return err.(*Error)
 }
 
-func GetOperations() error {
-	if E != nil {
-		return E.operations
+func (e *Error) Msg(message string) {
+	e.Message = message
+}
+
+func (e *Error) GetOperations() error {
+	if e != nil {
+		return e.operations
 	}
 	return nil
 }
 
-func Stack() error {
-	if E != nil {
-		return fmt.Errorf("%w | %s", E.Err, E.operations)
+func (e *Error) Stack() error {
+	if e != nil {
+		return fmt.Errorf("%w | %s", e.Cause, e.operations)
 	}
 	return nil
 }
