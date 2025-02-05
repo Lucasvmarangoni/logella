@@ -27,6 +27,7 @@ var Status = map[int]string{
 	http.StatusUnauthorized:        "Unauthorized",
 	http.StatusForbidden:           "Forbidden",
 	http.StatusInternalServerError: "InternalServerError",
+	http.StatusNotFound:            "NotFound",
 }
 
 func Wrap(cause error, contextValue string, code int) error {
