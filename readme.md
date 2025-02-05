@@ -135,14 +135,16 @@ errs.Status[http.StatusBadrequest]
 
 Use Case:
 ```go
-	authdata, err := u.userService.Authn(user.Email, user.Password)
+authdata, err := u.userService.VerifyTOTP(id, totpToken.Token)
 	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(errs.Assertion(err).Code)
 		json.NewEncoder(w).Encode(map[string]string{
-			"status":  errs.Status[errs.Assertion(err).Code],
-			"message": fmt.Sprintf("%v", errs.Assertion(err).ToClient()),
+			"status":     errs.Status[errs.Assertion(err).Code],
+			"message":    fmt.Sprintf("%v", errs.Assertion(err).ToClient()),
+			"request_id": requestID,
 		})
-		log.Error().Stack().Err(errs.Assertion(err).Stack()).Msg("Error authenticate user")
+		log.Error().Err(errs.Assertion(err).Stack()).Msgf("error validate totp. | (%s)", requestID)
 		return
 	}
 ```
@@ -236,14 +238,16 @@ log.Error().Stack().Err(errs.Assertion(err).Stack()).Msg("Error authenticate use
 
 Use Case:
 ```go
-	authdata, err := u.userService.Authn(user.Email, user.Password)
+authdata, err := u.userService.VerifyTOTP(id, totpToken.Token)
 	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(errs.Assertion(err).Code)
 		json.NewEncoder(w).Encode(map[string]string{
-			"status":  errs.Status[errs.Assertion(err).Code],
-			"message": fmt.Sprintf("%v", errs.Assertion(err).ToClient()),
+			"status":     errs.Status[errs.Assertion(err).Code],
+			"message":    fmt.Sprintf("%v", errs.Assertion(err).ToClient()),
+			"request_id": requestID,
 		})
-		log.Error().Stack().Err(errs.Assertion(err).Stack()).Msg("Error authenticate user")
+		log.Error().Err(errs.Assertion(err).Stack()).Msgf("error validate totp. | (%s)", requestID)
 		return
 	}
 ```
@@ -262,14 +266,16 @@ errs.Assertion(err).ToClient()
 
 Use Case:
 ```go
-	authdata, err := u.userService.Authn(user.Email, user.Password)
+authdata, err := u.userService.VerifyTOTP(id, totpToken.Token)
 	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(errs.Assertion(err).Code)
 		json.NewEncoder(w).Encode(map[string]string{
-			"status":  errs.Status[errs.Assertion(err).Code],
-			"message": fmt.Sprintf("%v", errs.Assertion(err).ToClient()),
+			"status":     errs.Status[errs.Assertion(err).Code],
+			"message":    fmt.Sprintf("%v", errs.Assertion(err).ToClient()),
+			"request_id": requestID,
 		})
-		log.Error().Stack().Err(errs.Assertion(err).Stack()).Msg("Error authenticate user")
+		log.Error().Err(errs.Assertion(err).Stack()).Msgf("error validate totp. | (%s)", requestID)
 		return
 	}
 ```
