@@ -249,6 +249,7 @@ Use Case:
 ```
 
 ### ToClient
+Check the Code of the error to if it is 500 return "Internal Server Error" instead of Cause (actual error)
 
 ```go
 func (e *Error) ToClient() error  
