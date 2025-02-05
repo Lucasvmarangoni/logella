@@ -18,7 +18,7 @@ A simple loggers and errors library.
   </a> 
 
 - <a href="#errs-package">
-   Errors
+   Errs
   </a> 
 
 - <a href="#router-package">
