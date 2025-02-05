@@ -8,11 +8,11 @@ import (
 )
 
 type Error struct {
-	Cause      error
-	Code       int
-	Message    string
-	added      bool
-	operations error
+	Cause   error
+	Code    int
+	Message string
+	added   bool
+	context error
 }
 
 func (e *Error) Error() string {
@@ -29,22 +29,22 @@ var Status = map[int]string{
 	http.StatusInternalServerError: "InternalServerError",
 }
 
-func Wrap(cause error, operationValue string, code int) error {
-	key := "Operation"
-	operation := fmt.Errorf("%s: %s", key, operationValue)
+func Wrap(cause error, contextValue string, code int) error {
+	key := "Context"
+	context := fmt.Errorf("%s: %s", key, contextValue)
 
 	var e *Error
 	if cause != nil {
 		var ok bool
 		if e, ok = cause.(*Error); !ok {
 			e = &Error{
-				Cause:      cause,
-				Code:       code,
-				added:      true,
-				operations: operation,
+				Cause:   cause,
+				Code:    code,
+				added:   true,
+				context: context,
 			}
 		} else {
-			e.operations = fmt.Errorf("%w; %s: %s", e.operations, key, operationValue)
+			e.context = fmt.Errorf("%w %s: %s", e.context, key, contextValue)
 			e.Cause = errors.Unwrap(cause)
 		}
 	}
@@ -59,16 +59,23 @@ func (e *Error) Msg(message string) {
 	e.Message = message
 }
 
-func (e *Error) GetOperations() error {
+func (e *Error) Context(operationValue string) error {
+	key := "Context"
+
+	e.context = fmt.Errorf("%w; %s: %s", e.context, key, operationValue)
+	return e.Cause
+}
+
+func (e *Error) GetContext() error {
 	if e != nil {
-		return e.operations
+		return e.context
 	}
 	return nil
 }
 
 func (e *Error) Stack() error {
 	if e != nil {
-		return fmt.Errorf("%w | %s", e.Cause, e.operations)
+		return fmt.Errorf("%w | %s", e.Cause, e.context)
 	}
 	return nil
 }
