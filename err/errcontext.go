@@ -72,12 +72,18 @@ func (e *Error) GetContext() error {
 	}
 	return nil
 }
+func (e *Error) ToClient() error {
+	if e != nil {
+		if e.Code == 500 {
+			return fmt.Errorf("%s", "Internal Server Error")
+		}
+		return fmt.Errorf("%w", e.Cause)
+	}
+	return nil
+}
 
 func (e *Error) Stack() error {
 	if e != nil {
-		if e.Code == 500 {
-			return fmt.Errorf("%s | %s", "Internal Server Error", e.context)
-		}
 		return fmt.Errorf("%w | %s", e.Cause, e.context)
 	}
 	return nil
