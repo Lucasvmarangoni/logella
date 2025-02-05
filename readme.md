@@ -75,42 +75,177 @@ It also provides standardized error types, such as `invalid` and `required`.
 import "github.com/Lucasvmarangoni/logella/err"
 ```
 
-**Ctx**: Ctx is used to add the error and the operation that triggered the exception. 
+**Wrap**: Ctx is used to add the error and the operation that triggered the exception. 
 The operations stack is not returned by ErrCtx, but rather persisted. 
 
-**GetOperations**: GetOperations is used to retrieve only the operations stack.
+**Assertion**: Used to make a type assertion error. 
 
-**Stack**: Stack returns the error along with the operations stack.
+**Context**: Used to add context do stack.
 
-![Alt text](img/errctx.png)
+**GetContext**: GetOperations is used to retrieve only the operations stack.
 
+**Stack**: Stack returns the error along with the operations stack. Used in internals Logs.
+
+**ToClient**: Used to send error message to client.
+
+**Msg**: Used to add a message to error.
+
+![alt text](img/log.png)
 
 ### Use
 ```go
-errs.Ctx(err, "repo.InitTables")
-errs.GetOperations()
+errs.Wrap(err, "repo.InitTables")
+errs.Assertion(err)
+errs.Context("string")
+errs.GetContext()
 errs.Stack()
+errs.ToClint()
+errs.Msg("string")
 ```
 
-### Ctx(err error, value string)
+### Error Struct
 
-This function creates an error with context. Here are examples of how to use it:
+```go
+type Error struct {
+	Cause   error   // The actual error thrown
+	Code    int     // HTTP Status Code
+	Message string  // Custom message
+	added   bool
+	context error
+}
+```
 
+### Wrap
+```go
+func Wrap(cause error, contextValue string, code int) error
+```
+
+*Example*:
 ```go
 cfg.Db, err = pgx.ParseConfig(url)
 if err != nil {
-    return nil, errs.Ctx(err, "pgx.ParseConfig(url)")
+    return nil, errs.Wrap(err, "pgx.ParseConfig(url)", http.InternalServerError)
 }
 ```
+The output of this function includes a field named "Context", which is the main feature of this package.
+
+### Assertion
 
 ```go
-dbConnection, err := db.Connect(ctx)
-if err != nil {
-    return nil, errs.Ctx(err, "db.Connect")
-}
+func Assertion(err error) *Error
 ```
 
-The output of this function includes a field named "Operation", which is the main feature of this package.
+Example:
+```go
+errs.Assertion(err)
+errs.Assertion(err).Code
+errs.Assertion(err).Cause
+errs.Assertion(err).Message
+```
+
+Use Case:
+Example:
+```go
+Err     := errs.Assertion(err)
+code    := errs.Assertion(err).Code
+cause   := errs.Assertion(err).Cause
+message := errs.Assertion(err).Message
+```
+
+### Context
+
+```go
+func (e *Error) Context(operationValue string) error 
+```
+
+Example:
+```go
+errs.Assertion(err).Context("context")
+```
+
+Use Case:
+```go
+
+func service() (string, error) {	
+	return "", errs.Wrap(errors.New("test error"), "anything", http.StatusInternalServerError)
+}
+
+func textError() (string, error) {
+	_, err := service()	
+   	errs.Assertion(err).Context("add extra context")
+	return "", errs.Assertion(err).Context("retuned context")
+}
+
+func main(){
+    _, err := textError()
+    log.Error().Err(errs.Assertion(err).Stack()).Msg(fmt.Sprint(errs.Assertion(err).Code)) // Log
+	log.Error().Err(errs.Assertion(err).ToClient()).Msg(fmt.Sprint(errs.Assertion(err).Code)) // Client
+}
+// output
+// Log: {"level":"error","error":"test error | Context: anything; Context: add extra context; Context: retuned context","time":"2025-02-05T15:53:17-03:00","message":"500"}
+// Clint: {"level":"error","error":"Internal Server Error","time":"2025-02-05T15:53:17-03:00","message":"500"}
+```
+
+### Stack
+
+```go
+func (e *Error) Stack() error 
+```
+
+Example:
+```go
+log.Error().Stack().Err(errs.Assertion(err).Stack()).Msg("Error authenticate user")
+```
+
+Use Case:
+```go
+	authdata, err := u.userService.Authn(user.Email, user.Password)
+	if err != nil {
+		w.WriteHeader(errs.Assertion(err).Code)
+		json.NewEncoder(w).Encode(map[string]string{
+			"status":  errs.Status[errs.Assertion(err).Code],
+			"message": fmt.Sprintf("%v", errs.Assertion(err).ToClient()),
+		})
+		log.Error().Stack().Err(errs.Assertion(err).Stack()).Msg("Error authenticate user")
+		return
+	}
+```
+
+### ToClient
+
+```go
+func (e *Error) ToClient() error  
+```
+
+Example:
+```go
+errs.Assertion(err).ToClient()
+```
+
+Use Case:
+```go
+	authdata, err := u.userService.Authn(user.Email, user.Password)
+	if err != nil {
+		w.WriteHeader(errs.Assertion(err).Code)
+		json.NewEncoder(w).Encode(map[string]string{
+			"status":  errs.Status[errs.Assertion(err).Code],
+			"message": fmt.Sprintf("%v", errs.Assertion(err).ToClient()),
+		})
+		log.Error().Stack().Err(errs.Assertion(err).Stack()).Msg("Error authenticate user")
+		return
+	}
+```
+
+### Msg
+
+```go
+func (e *Error) Msg(message string) ```
+
+Example:
+```go
+errs.Assertion(err).Msg("Message")
+message := errs.Assertion(err).Message
+```
 
 ### Standard Errors
 
@@ -127,6 +262,43 @@ errs.IsInvalidError("Customer", "Must be google uuid")
 - PanicBool(boolean bool, msg string)
 
 <br><br>
+
+### GetHTTPStatusFromPgError 
+**Compatible with PGX V5 library**
+
+A function to determine HTTP status automatically based on database error message.
+
+```go
+func GetHTTPStatusFromPgError(err error) int
+```
+Example: 
+```go
+return errs.Wrap(err, "row.Scan", errs.GetHTTPStatusFromPgError(err))
+```
+
+Use Case: 
+```go
+func (r *UserRepositoryDb) UpdateOTP(user *entities.User, ctx context.Context) error {
+	sql := `UPDATE users SET otp_auth_url = encrypt($2::BYTES, $4::BYTES, 'aes'), otp_secret = encrypt($3::BYTES, $4::BYTES, 'aes') WHERE id = $1`
+	err := crdbpgx.ExecuteTx(ctx, r.conn, pgx.TxOptions{}, func(tx pgx.Tx) error {
+		_, err := tx.Exec(ctx, sql,
+			user.ID,
+			user.OtpAuthUrl,
+			user.OtpSecret,
+			r.key,
+		)
+		if err != nil {
+			return errs.Wrap(err, "tx.Exec", errs.GetHTTPStatusFromPgError(err))
+		}
+		return nil
+	})
+	if err != nil {
+		return errs.Assertion(err).Context("crdbpgx.ExecuteTx")
+	}
+	return nil
+}
+```
+
 
 ## Router Package
 
