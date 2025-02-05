@@ -17,7 +17,7 @@ A simple loggers and errors library.
    Logger
   </a> 
 
-- <a href="#errors-package">
+- <a href="#errs-package">
    Errors
   </a> 
 
