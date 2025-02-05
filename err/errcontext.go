@@ -67,12 +67,6 @@ func (e *Error) Context(operationValue string) error {
 	return e
 }
 
-func (e *Error) GetContext() error {
-	if e != nil {
-		return e.context
-	}
-	return nil
-}
 func (e *Error) ToClient() error {
 	if e != nil {
 		if e.Code == 500 {
