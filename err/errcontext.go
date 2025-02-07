@@ -60,7 +60,7 @@ func (e *Error) Msg(message string) {
 	e.Message = message
 }
 
-func (e *Error) Context(operationValue string) error {
+func (e *Error) Context(operationValue string) *Error {
 	key := "Context"
 
 	e.context = fmt.Errorf("%w; %s: %s", e.context, key, operationValue)
