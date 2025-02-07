@@ -133,7 +133,7 @@ authdata, err := u.userService.VerifyTOTP(id, totpToken.Token)
 			"message":    fmt.Sprintf("%v", errs.Assertion(err).ToClient()),
 			"request_id": requestID,
 		})
-		log.Error().Err(errs.Assertion(err).Stack()).Msgf("error validate totp. | (%s)", requestID)
+		log.Error().Err(errs.Assertion(err).Context("u.userService.VerifyTOTP").Stack()).Msgf("error validate totp. | (%s)", requestID)
 		return
 	}
 ```
@@ -144,7 +144,7 @@ errs.Wrap(err, "repo.InitTables")
 errs.Assertion(err)
 errs.Context("string")
 errs.GetContext()
-errs.Stack()
+errs.Context("u.userService.VerifyTOTP").Stack()
 errs.ToClint()
 errs.Msg("string")
 ```
@@ -208,7 +208,7 @@ func textError() (string, error) {
 
 func main(){
     _, err := textError()
-    log.Error().Err(errs.Assertion(err).Stack()).Msg(fmt.Sprint(errs.Assertion(err).Code)) // Log
+    log.Error().Err(errs.Assertion(err).Context("textError()").Stack()).Msg(fmt.Sprint(errs.Assertion(err).Code)) // Log
 	log.Error().Err(errs.Assertion(err).ToClient()).Msg(fmt.Sprint(errs.Assertion(err).Code)) // Client
 }
 // output
@@ -224,7 +224,7 @@ func (e *Error) Stack() error
 
 Example:
 ```go
-log.Error().Stack().Err(errs.Assertion(err).Stack()).Msg("Error authenticate user")
+log.Error().Context("u.userService.VerifyTOTP").Stack().Err(errs.Assertion(err).Context("u.userService.VerifyTOTP").Stack()).Msg("Error authenticate user")
 ```
 
 Use Case:
@@ -238,7 +238,7 @@ authdata, err := u.userService.VerifyTOTP(id, totpToken.Token)
 			"message":    fmt.Sprintf("%v", errs.Assertion(err).ToClient()),
 			"request_id": requestID,
 		})
-		log.Error().Err(errs.Assertion(err).Stack()).Msgf("error validate totp. | (%s)", requestID)
+		log.Error().Err(errs.Assertion(err).Context("u.userService.VerifyTOTP").Stack()).Msgf("error validate totp. | (%s)", requestID)
 		return
 	}
 ```
@@ -266,7 +266,7 @@ authdata, err := u.userService.VerifyTOTP(id, totpToken.Token)
 			"message":    fmt.Sprintf("%v", errs.Assertion(err).ToClient()),
 			"request_id": requestID,
 		})
-		log.Error().Err(errs.Assertion(err).Stack()).Msgf("error validate totp. | (%s)", requestID)
+		log.Error().Err(errs.Assertion(err).Context("u.userService.VerifyTOTP").Stack()).Msgf("error validate totp. | (%s)", requestID)
 		return
 	}
 ```
