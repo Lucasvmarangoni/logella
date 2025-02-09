@@ -12,7 +12,7 @@ type Error struct {
 	Code    int
 	Message string
 	added   bool
-	context error
+	trace   error
 }
 
 func (e *Error) Error() string {
@@ -30,22 +30,22 @@ var Status = map[int]string{
 	http.StatusNotFound:            "NotFound",
 }
 
-func Wrap(cause error, contextValue string, code int) error {
-	key := "Context"
-	context := fmt.Errorf("%s: %s", key, contextValue)
+func Wrap(cause error, traceValue string, code int) error {
+	key := "Trace"
+	trace := fmt.Errorf("%s: %s", key, traceValue)
 
 	var e *Error
 	if cause != nil {
 		var ok bool
 		if e, ok = cause.(*Error); !ok {
 			e = &Error{
-				Cause:   cause,
-				Code:    code,
-				added:   true,
-				context: context,
+				Cause: cause,
+				Code:  code,
+				added: true,
+				trace: trace,
 			}
 		} else {
-			e.context = fmt.Errorf("%w %s: %s", e.context, key, contextValue)
+			e.trace = fmt.Errorf("%w %s: %s", e.trace, key, traceValue)
 			e.Cause = errors.Unwrap(cause)
 		}
 	}
@@ -60,10 +60,10 @@ func (e *Error) Msg(message string) {
 	e.Message = message
 }
 
-func (e *Error) Context(operationValue string) *Error {
-	key := "Context"
+func (e *Error) Trace(operationValue string) *Error {
+	key := "Trace"
 
-	e.context = fmt.Errorf("%w; %s: %s", e.context, key, operationValue)
+	e.trace = fmt.Errorf("%w; %s: %s", e.trace, key, operationValue)
 	return e
 }
 
@@ -79,7 +79,7 @@ func (e *Error) ToClient() error {
 
 func (e *Error) Stack() error {
 	if e != nil {
-		return fmt.Errorf("%w | %s", e.Cause, e.context)
+		return fmt.Errorf("%w | %s", e.Cause, e.trace)
 	}
 	return nil
 }

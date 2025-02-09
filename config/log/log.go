@@ -16,7 +16,7 @@ type LogColorsConfig struct {
 	Debug   colors
 	Fatal   colors
 	Message colors
-	Context colors
+	Trace colors
 }
 
 var instanceColorsConfig *LogColorsConfig
@@ -42,7 +42,7 @@ func GetLogColorsConfig() {
 			Debug:   Cyan,
 			Fatal:   Red,
 			Message: Magenta,
-			Context: Blue,
+			Trace: Blue,
 		}
 	})
 
@@ -52,7 +52,7 @@ func ConfigDefault() {
 	GetLogColorsConfig()
 }
 
-func ConfigCustom(info, err, warn, debug, fatal, message, context colors) {
+func ConfigCustom(info, err, warn, debug, fatal, message, Trace colors) {
 	onceConfig.Do(func() {
 		instanceColorsConfig = &LogColorsConfig{
 			Info:    info,
@@ -61,7 +61,7 @@ func ConfigCustom(info, err, warn, debug, fatal, message, context colors) {
 			Debug:   debug,
 			Fatal:   fatal,
 			Message: message,
-			Context: context,
+			Trace: Trace,
 		}
 	})
 }
