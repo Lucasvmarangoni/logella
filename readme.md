@@ -65,7 +65,7 @@ logger.ConfigCustom(Green, Red, Yellow, Cyan, Red, Magenta, Blue)
 
 ## Errs Package
 
-The `Errs` package is a custom error handling library. Its primary feature is to attach contextual information to errors, allowing them to be propagated up the call stack. 
+The `Errs` package is a custom error handling library. Its primary feature is to attach Traceual information to errors, allowing them to be propagated up the call stack. 
 
 It also provides standardized error types, such as `invalid` and `required`.
 
@@ -80,9 +80,7 @@ The operations stack is not returned by ErrCtx, but rather persisted.
 
 **Assertion**: Used to make a type assertion error. 
 
-**Context**: Used to add context do stack.
-
-**GetContext**: GetOperations is used to retrieve only the operations stack.
+**Trace**: Used to add trace do stack.
 
 **Stack**: Stack returns the error along with the operations stack. Used in internals Logs.
 
@@ -100,7 +98,7 @@ type Error struct {
 	Code    int     // HTTP Status Code
 	Message string  // Custom message
 	added   bool
-	context error
+	trace error
 }
 ```
 
@@ -133,7 +131,7 @@ authdata, err := u.userService.VerifyTOTP(id, totpToken.Token)
 			"message":    fmt.Sprintf("%v", errs.Assertion(err).ToClient()),
 			"request_id": requestID,
 		})
-		log.Error().Err(errs.Assertion(err).Context("u.userService.VerifyTOTP").Stack()).Msgf("error validate totp. | (%s)", requestID)
+		log.Error().Err(errs.Assertion(err).Trace("u.userService.VerifyTOTP").Stack()).Msgf("error validate totp. | (%s)", requestID)
 		return
 	}
 ```
@@ -142,16 +140,16 @@ authdata, err := u.userService.VerifyTOTP(id, totpToken.Token)
 ```go
 errs.Wrap(err, "repo.InitTables")
 errs.Assertion(err)
-errs.Context("string")
-errs.GetContext()
-errs.Context("u.userService.VerifyTOTP").Stack()
-errs.ToClint()
-errs.Msg("string")
+errs.Assertion(err).Trace("string")
+errs.Assertion(err).Stack()
+errs.Assertion(err).Trace("u.userService.VerifyTOTP").Stack()
+errs.Assertion(err).ToClint()
+errs.Assertion(err).Msg("string")
 ```
 
 #### Wrap
 ```go
-func Wrap(cause error, contextValue string, code int) error
+func Wrap(cause error, TraceValue string, code int) error
 ```
 
 Example:
@@ -182,15 +180,15 @@ errs.Assertion(err).Cause
 errs.Assertion(err).Message
 ```
 
-#### Context
+#### Trace
 
 ```go
-func (e *Error) Context(operationValue string) error 
+func (e *Error) Trace(operationValue string) error 
 ```
 
 Example:
 ```go
-errs.Assertion(err).Context("context")
+errs.Assertion(err).Trace("Trace")
 ```
 
 Use Case:
@@ -202,17 +200,17 @@ func service() (string, error) {
 
 func textError() (string, error) {
 	_, err := service()	
-   	errs.Assertion(err).Context("add extra context")
-	return "", errs.Assertion(err).Context("retuned context")
+   	errs.Assertion(err).Trace("add extra Trace")
+	return "", errs.Assertion(err).Trace("retuned Trace")
 }
 
 func main(){
     _, err := textError()
-    log.Error().Err(errs.Assertion(err).Context("textError()").Stack()).Msg(fmt.Sprint(errs.Assertion(err).Code)) // Log
+    log.Error().Err(errs.Assertion(err).Trace("textError()").Stack()).Msg(fmt.Sprint(errs.Assertion(err).Code)) // Log
 	log.Error().Err(errs.Assertion(err).ToClient()).Msg(fmt.Sprint(errs.Assertion(err).Code)) // Client
 }
 // output
-// Log: {"level":"error","error":"test error | Context: anything; Context: add extra context; Context: retuned context","time":"2025-02-05T15:53:17-03:00","message":"500"}
+// Log: {"level":"error","error":"test error | Trace: anything; Trace: add extra Trace; Trace: retuned Trace","time":"2025-02-05T15:53:17-03:00","message":"500"}
 // Clint: {"level":"error","error":"Internal Server Error","time":"2025-02-05T15:53:17-03:00","message":"500"}
 ```
 
@@ -224,7 +222,7 @@ func (e *Error) Stack() error
 
 Example:
 ```go
-log.Error().Context("u.userService.VerifyTOTP").Stack().Err(errs.Assertion(err).Context("u.userService.VerifyTOTP").Stack()).Msg("Error authenticate user")
+log.Error().Trace("u.userService.VerifyTOTP").Stack().Err(errs.Assertion(err).Trace("u.userService.VerifyTOTP").Stack()).Msg("Error authenticate user")
 ```
 
 Use Case:
@@ -238,7 +236,7 @@ authdata, err := u.userService.VerifyTOTP(id, totpToken.Token)
 			"message":    fmt.Sprintf("%v", errs.Assertion(err).ToClient()),
 			"request_id": requestID,
 		})
-		log.Error().Err(errs.Assertion(err).Context("u.userService.VerifyTOTP").Stack()).Msgf("error validate totp. | (%s)", requestID)
+		log.Error().Err(errs.Assertion(err).Trace("u.userService.VerifyTOTP").Stack()).Msgf("error validate totp. | (%s)", requestID)
 		return
 	}
 ```
@@ -266,7 +264,7 @@ authdata, err := u.userService.VerifyTOTP(id, totpToken.Token)
 			"message":    fmt.Sprintf("%v", errs.Assertion(err).ToClient()),
 			"request_id": requestID,
 		})
-		log.Error().Err(errs.Assertion(err).Context("u.userService.VerifyTOTP").Stack()).Msgf("error validate totp. | (%s)", requestID)
+		log.Error().Err(errs.Assertion(err).Trace("u.userService.VerifyTOTP").Stack()).Msgf("error validate totp. | (%s)", requestID)
 		return
 	}
 ```
@@ -314,7 +312,7 @@ return errs.Wrap(err, "row.Scan", errs.GetHTTPStatusFromPgError(err))
 
 Use Case: 
 ```go
-func (r *UserRepositoryDb) UpdateOTP(user *entities.User, ctx context.Context) error {
+func (r *UserRepositoryDb) UpdateOTP(user *entities.User, ctx Trace.Trace) error {
 	sql := `UPDATE users SET otp_auth_url = encrypt($2::BYTES, $4::BYTES, 'aes'), otp_secret = encrypt($3::BYTES, $4::BYTES, 'aes') WHERE id = $1`
 	err := crdbpgx.ExecuteTx(ctx, r.conn, pgx.TxOptions{}, func(tx pgx.Tx) error {
 		_, err := tx.Exec(ctx, sql,
@@ -329,7 +327,7 @@ func (r *UserRepositoryDb) UpdateOTP(user *entities.User, ctx context.Context) e
 		return nil
 	})
 	if err != nil {
-		return errs.Assertion(err).Context("crdbpgx.ExecuteTx")
+		return errs.Assertion(err).Trace("crdbpgx.ExecuteTx")
 	}
 	return nil
 }
