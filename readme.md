@@ -46,7 +46,7 @@ logger.ConfigDefault()
 **ConfigCustom**: Allows you to customize log level, message, and operation colors.
 
 ```go
-ConfigCustom(info, err, warn, debug, fatal, message, operation colors)
+ConfigCustom(info, err, warn, debug, fatal, message, trace colors)
 ```
 
 The parameters must be passed using the variables already defined by the package with the name of the colors.

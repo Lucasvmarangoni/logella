@@ -52,7 +52,7 @@ func ConfigDefault() {
 	GetLogColorsConfig()
 }
 
-func ConfigCustom(info, err, warn, debug, fatal, message, Trace colors) {
+func ConfigCustom(info, err, warn, debug, fatal, message, trace colors) {
 	onceConfig.Do(func() {
 		instanceColorsConfig = &LogColorsConfig{
 			Info:    info,
@@ -61,7 +61,7 @@ func ConfigCustom(info, err, warn, debug, fatal, message, Trace colors) {
 			Debug:   debug,
 			Fatal:   fatal,
 			Message: message,
-			Trace: Trace,
+			Trace: trace,
 		}
 	})
 }
