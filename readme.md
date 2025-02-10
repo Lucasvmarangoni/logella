@@ -57,7 +57,7 @@ Example:
 
 
 ```go
-logger.ConfigCustom(Green, Red, Yellow, Cyan, Red, Magenta, Blue)
+logger.ConfigCustom(logger.Green, logger.Red, logger.Yellow, logger.Cyan, logger.Red, logger.Magenta, logger.Blue)
 ```
 
 <br><br>
@@ -295,7 +295,7 @@ errs.IsInvalidError("Customer", "Must be google uuid")
 - PanicErr(err error, ctx string)
 - PanicBool(boolean bool, msg string)
 
-<br><br>
+<br>
 
 ### GetHTTPStatusFromPgError 
 **Compatible with PGX V5 library**
