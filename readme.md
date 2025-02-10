@@ -60,6 +60,15 @@ Example:
 logger.ConfigCustom(logger.Green, logger.Red, logger.Yellow, logger.Cyan, logger.Red, logger.Magenta, logger.Blue)
 ```
 
+**Use Case**
+```go
+log.Info().Str("context", "TableRepository").Msg("Database - Created users table successfully.")
+```
+
+Output:
+
+![alt text](img/router-example.png)
+
 <br><br>
 
 
@@ -339,15 +348,6 @@ func (r *UserRepositoryDb) UpdateOTP(user *entities.User, ctx Trace.Trace) error
 The `Router` is a logging package for initializing routes using go-chi.
 
 ![Alt text](img/router.png)
-
-Example:
-```go
-log.Info().Str("context", "TableRepository").Msg("Database - Created users table successfully.")
-```
-
-Output:
-
-![alt text](img/router-example.png)
 
 ### Import
 
