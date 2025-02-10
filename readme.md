@@ -69,8 +69,7 @@ Output:
 
 ![alt text](img/router-example.png)
 
-<br><br>
-
+<br>
 
 ## Errs Package
 
