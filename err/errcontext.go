@@ -23,12 +23,19 @@ func (e *Error) Error() string {
 }
 
 var Status = map[int]string{
-	http.StatusBadRequest:          "BadRequest",
-	http.StatusUnauthorized:        "Unauthorized",
-	http.StatusForbidden:           "Forbidden",
-	http.StatusInternalServerError: "InternalServerError",
-	http.StatusNotFound:            "NotFound",
+	http.StatusBadRequest:           "BadRequest",
+	http.StatusUnauthorized:         "Unauthorized",
+	http.StatusForbidden:            "Forbidden",
+	http.StatusNotFound:             "NotFound",
+	http.StatusInternalServerError:  "InternalServerError",
+	http.StatusUnsupportedMediaType: "UnsupportedMediaType",
+	http.StatusNoContent:            "NoContent",
+	http.StatusMovedPermanently:     "MovedPermanently",
+	http.StatusTemporaryRedirect:    "TemporaryRedirect",
+	http.StatusBadGateway:           "BadGateway",
+	http.StatusServiceUnavailable:   "ServiceUnavailable",
 }
+
 
 func Wrap(cause error, traceValue string, code int) error {
 	key := "Trace"
