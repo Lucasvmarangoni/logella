@@ -77,18 +77,25 @@ The `Errs` package is a custom error handling library. Its primary feature is to
 
 It also provides standardized error types, such as `invalid` and `required`.
 
+Output Example:
+```go
+log.Error().Err(errs.Trace(err).Stack()).Msg("example error")
+log.Error().Err(errs.Unwrap(err).Stack()).Msg("example error")
+log.Error().Err(errs.Unwrap(err).Stack()).Msg("example error")
+```
+![alt text](img/log.png)
+
 
 ### Import
 ```go
 import "github.com/Lucasvmarangoni/logella/err"
 ```
 
+
 **Wrap**: Ctx is used to add the error and the operation that triggered the exception. 
 The operations stack is not returned by ErrCtx, but rather persisted. 
 
-**Assertion**: Used to make a type assertion error. 
-
-**Trace**: Used to add trace do stack.
+**Trace**: Used to add the trace do stack.
 
 **Stack**: Stack returns the error along with the operations stack. Used in internals Logs.
 
@@ -96,7 +103,8 @@ The operations stack is not returned by ErrCtx, but rather persisted.
 
 **Msg**: Used to add a message to error.
 
-![alt text](img/log.png)
+**Unwrap**: It makes the type assertion and is used to access de Error Struct whitout performing other functionality.
+
 
 ### Error Struct
 
@@ -110,116 +118,60 @@ type Error struct {
 }
 ```
 
-### Status
-
-```go
-var Status = map[int]string{
-	http.StatusBadRequest:          "BadRequest",
-	http.StatusUnauthorized:        "Unauthorized",
-	http.StatusForbidden:           "Forbidden",
-	http.StatusInternalServerError: "InternalServerError",
-	http.StatusNotFound:            "NotFound",
-}
-```
-
-Example:
-```go
-errs.Status[errs.Assertion(err).Code]
-errs.Status[http.StatusBadrequest]
-```
-
-Use Case:
-```go
-authdata, err := u.userService.VerifyTOTP(id, totpToken.Token)
-	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(errs.Assertion(err).Code)
-		json.NewEncoder(w).Encode(map[string]string{
-			"status":     errs.Status[errs.Assertion(err).Code],
-			"message":    fmt.Sprintf("%v", errs.Assertion(err).ToClient()),
-			"request_id": requestID,
-		})
-		log.Error().Err(errs.Assertion(err).Trace("u.userService.VerifyTOTP").Stack()).Msgf("error validate totp. | (%s)", requestID)
-		return
-	}
-```
-
-### Use
-```go
-errs.Wrap(err, "repo.InitTables")
-errs.Assertion(err)
-errs.Assertion(err).Trace("string")
-errs.Assertion(err).Stack()
-errs.Assertion(err).Trace("u.userService.VerifyTOTP").Stack()
-errs.Assertion(err).ToClint()
-errs.Assertion(err).Msg("string")
-```
-
 #### Wrap
 ```go
-func Wrap(cause error, TraceValue string, code int) error
+func Wrap(cause error, code int) error
 ```
 
 Example:
 ```go
-errs.Wrap(err, "pgx.ParseConfig(url)", http.InternalServerError)
+errs.Wrap(err, http.InternalServerError)
 ```
 
 Use case:
 ```go
-errs.Wrap(err, "pgx.ParseConfig(url)", http.InternalServerError)
+errs.Wrap(err, http.InternalServerError)
 cfg.Db, err = pgx.ParseConfig(url)
 if err != nil {
-    return nil, errs.Wrap(err, "pgx.ParseConfig(url)", http.InternalServerError)
+    return nil, errs.Wrap(err, http.InternalServerError)
 }
-```
-
-#### Assertion
-
-```go
-func Assertion(err error) *Error
-```
-
-Example:
-```go
-errs.Assertion(err)
-errs.Assertion(err).Code
-errs.Assertion(err).Cause
-errs.Assertion(err).Message
 ```
 
 #### Trace
 
 ```go
-func (e *Error) Trace(operationValue string) error 
+func Trace(err error) *Error
 ```
 
 Example:
 ```go
-errs.Assertion(err).Trace("Trace")
+errs.Trace(err)
 ```
 
 Use Case:
 ```go
-
-func service() (string, error) {	
-	return "", errs.Wrap(errors.New("test error"), "anything", http.StatusInternalServerError)
+func main() {
+	_, err := handler()
+	log.Error().Err(errs.Unwrap(err).Stack()).Stack().Msg(fmt.Sprint(errs.Unwrap(err).Code)) 
+	// OUTPUT: 2025-02-20T18:29:26-03:00 ERROR ⇝ 500 error"test error | ➜ repository; ➜ service; ➜ handler; ➜ main"
 }
 
-func textError() (string, error) {
-	_, err := service()	
-   	errs.Assertion(err).Trace("add extra Trace")
-	return "", errs.Assertion(err).Trace("retuned Trace")
+func handler() (string, error) {
+	_, err := service()
+	return "", errs.Trace(err)
 }
 
-func main(){
-    _, err := textError()
-    log.Error().Err(errs.Assertion(err).Trace("textError()").Stack()).Msg(fmt.Sprint(errs.Assertion(err).Code)) // Log
-	log.Error().Err(errs.Assertion(err).ToClient()).Msg(fmt.Sprint(errs.Assertion(err).Code)) // Client
+func service() (string, error) {
+	err := repository()
+	if err != nil {
+		return "", errs.Trace(err)
+	}
+	return "", nil
 }
-// output
-// Log: {"level":"error","error":"test error | Trace: anything; Trace: add extra Trace; Trace: retuned Trace","time":"2025-02-05T15:53:17-03:00","message":"500"}
-// Clint: {"level":"error","error":"Internal Server Error","time":"2025-02-05T15:53:17-03:00","message":"500"}
+
+func repository() error {
+	return errs.Wrap(errors.New("test error"), 500)
+}
 ```
 
 #### Stack
@@ -230,7 +182,7 @@ func (e *Error) Stack() error
 
 Example:
 ```go
-log.Error().Trace("u.userService.VerifyTOTP").Stack().Err(errs.Assertion(err).Trace("u.userService.VerifyTOTP").Stack()).Msg("Error authenticate user")
+log.Error().Err(errs.Trace(err).Stack())
 ```
 
 Use Case:
@@ -238,13 +190,13 @@ Use Case:
 authdata, err := u.userService.VerifyTOTP(id, totpToken.Token)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(errs.Assertion(err).Code)
+		w.WriteHeader(errs.Unwrap(err).Code)
 		json.NewEncoder(w).Encode(map[string]string{
-			"status":     errs.Status[errs.Assertion(err).Code],
-			"message":    fmt.Sprintf("%v", errs.Assertion(err).ToClient()),
+			"status":     errs.Status[errs.Unwrap(err).Code],
+			"message":    fmt.Sprintf("%v", errs.Unwrap(err).ToClient()),
 			"request_id": requestID,
 		})
-		log.Error().Err(errs.Assertion(err).Trace("u.userService.VerifyTOTP").Stack()).Msgf("error validate totp. | (%s)", requestID)
+		log.Error().Err(errs.Trace(err).Stack()).Msgf("error validate totp. | (%s)", requestID)
 		return
 	}
 ```
@@ -258,7 +210,12 @@ func (e *Error) ToClient() error
 
 Example:
 ```go
-errs.Assertion(err).ToClient()
+errs.Unwrap(err).ToClient()
+```
+
+```go
+	log.Error().Err(errs.Unwrap(err).ToClient()).Msg(fmt.Sprint(errs.Unwrap(err).Code)) 
+	// OUTPUT: 2025-02-20T18:29:26-03:00 ERROR ⇝ 500 error"Internal Server Error"
 ```
 
 Use Case:
@@ -266,13 +223,13 @@ Use Case:
 authdata, err := u.userService.VerifyTOTP(id, totpToken.Token)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(errs.Assertion(err).Code)
+		w.WriteHeader(errs.Unwrap(err).Code)
 		json.NewEncoder(w).Encode(map[string]string{
-			"status":     errs.Status[errs.Assertion(err).Code],
-			"message":    fmt.Sprintf("%v", errs.Assertion(err).ToClient()),
+			"status":     errs.Status[errs.Unwrap(err).Code],
+			"message":    fmt.Sprintf("%v", errs.Unwrap(err).ToClient()),
 			"request_id": requestID,
 		})
-		log.Error().Err(errs.Assertion(err).Trace("u.userService.VerifyTOTP").Stack()).Msgf("error validate totp. | (%s)", requestID)
+		log.Error().Err(errs.Trace(err).Stack()).Msgf("error validate totp. | (%s)", requestID)
 		return
 	}
 ```
@@ -285,8 +242,79 @@ func (e *Error) Msg(message string)
 
 Example:
 ```go
-errs.Assertion(err).Msg("Message")
-message := errs.Assertion(err).Message
+errs.Trace(err).Msg("Message")
+message := errs.Trace(err).Message
+```
+
+
+#### Unwrap
+Used when you should not add a trace to the error. Otherwise a duplicate trace will be added.
+
+```go
+func Unwrap(err error) *Error 
+```
+
+Example:
+```go
+errs.Unwrap(err).Msg("Message")
+message := errs.Unwrap(err).Message
+code := errs.Unwrap(err).Code
+cause := errs.Unwrap(err).Cause
+```
+
+Use Case
+```go
+log.Error().Err(errs.Trace(err).Stack()).Msg(fmt.Sprint(errs.Unwrap(err).Code))
+```
+
+```go
+authdata, err := u.userService.VerifyTOTP(id, totpToken.Token)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(errs.Unwrap(err).Code)
+		json.NewEncoder(w).Encode(map[string]string{
+			"status":     errs.Status[errs.Unwrap(err).Code],
+			"message":    fmt.Sprintf("%v", errs.Unwrap(err).ToClient()),
+			"request_id": requestID,
+		})
+		log.Error().Err(errs.Trace(err).Stack()).Msgf("%s. | (%s)", errs.Unwrap(err).Message, requestID)
+		return
+	}
+```
+
+### Status
+
+```go
+var Status = map[int]string{
+	http.StatusBadRequest:          "BadRequest",
+	http.StatusUnauthorized:        "Unauthorized",
+	http.StatusForbidden:           "Forbidden",
+	http.StatusInternalServerError: "InternalServerError",
+	http.StatusNotFound:            "NotFound",
+	...
+}
+```
+
+Example:
+```go
+errs.Status[errs.Unwrap(err).Code]
+errs.Status[http.StatusBadrequest]
+```
+
+Use Case:
+```go
+authdata, err := u.userService.VerifyTOTP(id, totpToken.Token)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(errs.Unwrap(err).Code)
+		json.NewEncoder(w).Encode(map[string]string{
+			"status":     errs.Status[errs.Unwrap(err).Code],
+			"message":    fmt.Sprintf("%v", errs.Unwrap(err).ToClient()),
+			"request_id": requestID,
+		})
+		log.Error().Err(errs.Trace(err).Stack()).Msgf("error validate totp. | (%s)", requestID)
+		return
+	}
 ```
 
 ### Standard Errors
@@ -335,7 +363,7 @@ func (r *UserRepositoryDb) UpdateOTP(user *entities.User, ctx Trace.Trace) error
 		return nil
 	})
 	if err != nil {
-		return errs.Assertion(err).Trace("crdbpgx.ExecuteTx")
+		return errs.Trace(err)
 	}
 	return nil
 }
