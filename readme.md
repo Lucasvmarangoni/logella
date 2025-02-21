@@ -137,15 +137,14 @@ func Wrap(cause error, code int) error
 
 Example:
 ```go
-errs.Wrap(err, http.InternalServerError)
+errs.Wrap(err, http.StatusInternalServerError)
 ```
 
 Use case:
 ```go
-errs.Wrap(err, http.InternalServerError)
 cfg.Db, err = pgx.ParseConfig(url)
 if err != nil {
-    return nil, errs.Wrap(err, http.InternalServerError)
+    return nil, errs.Wrap(err, http.StatusInternalServerError)
 }
 ```
 
