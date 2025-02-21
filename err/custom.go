@@ -29,6 +29,12 @@ func New(cause error) *Error {
 	return e
 }
 
+func PanicErr(err error, msg string) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 func PanicBool(boolean bool, msg string) {
 	if !boolean {
 		panic(msg)

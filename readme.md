@@ -92,37 +92,39 @@ log.Error().Err(errs.Unwrap(err).Stack()).Msg("example error")
 import "github.com/Lucasvmarangoni/logella/err"
 ```
 
-**Wrap**: Ctx is used to add the error and the operation that triggered the exception. 
+<a href="#wrap">**Wrap**</a>: Ctx is used to add the error and the operation that triggered the exception. 
 The operations stack is not returned by ErrCtx, but rather persisted. 
 
-**Trace**: Used to add the trace to stack.
+<a href="#trace">**Trace**</a>: Used to add the trace to stack.
 
-**Stack**: Stack returns the error along with the operations stack. Used in internals Logs.
+<a href="#stack">**Stack**</a>: Stack returns the error along with the operations stack. Used in internals Logs.
 
-**ToClient**: Used to send error message to client.
+<a href="#toclient">**ToClient**</a>: Used to send error message to client.
 
-**Msg**: Used to add a message to error.
+<a href="#msg">**Msg**</a>: Used to add a message to error.
 
-**Unwrap**: It makes the type assertion and is used to access de Error Struct whitout performing other functionality.
+<a href="#unwrap">**Unwrap**</a>: It makes the type assertion and is used to access de Error Struct whitout performing other functionality.
 
-**New**: Used to add the trace to stack without http status code. Recommended for incializations exceptions.
+<a href="#gethttpstatusfrompgerror">**GetHTTPStatusFromPgError**</a>: Used to determine HTTP status automatically based on database error message.
 
-**FailOnErrLog**: Used to throw a fatal log in a simple way and with trace stack.
+<a href="#new">**New**</a>: Used to add the trace to stack without http status code. Recommended for incializations exceptions.
 
-**PanicBool**: Used to throw a panic based on a boolean value, whitout the needs to manualy use an if conditional.
+<a href="#unwrap">**FailOnErrLog**</a>: Used to throw a fatal log in a simple way and with trace stack.
 
-**IsRequiredError**: Used to simplify create a "is requered" error with fmt.Errorf.
+<a href="#panicerr">**PanicErr**</a>: Used to throw a panic based on a error value, whitout the needs to manualy use an if conditional.
 
-**IsInvalidError**: Used to simplify create a "is invalid" error with fmt.Errorf.
+<a href="#panicbool">**PanicBool**</a>: Used to throw a panic based on a boolean value, whitout the needs to manualy use an if conditional.
+
+<a href="#isrequirederror">**IsRequiredError**</a>: Used to simplify create a "is requered" error with fmt.Errorf.
+
+<a href="#isinvaliderror">**IsInvalidError**</a>: Used to simplify create a "is invalid" error with fmt.Errorf.
 
 ### Error Struct
-
 ```go
 type Error struct {
 	Cause   error   // The actual error thrown
 	Code    int     // HTTP Status Code
 	Message string  // Custom message
-	added   bool
 	trace error
 }
 ```
@@ -161,7 +163,7 @@ Use Case:
 ```go
 func main() {
 	_, err := handler()
-	log.Error().Err(errs.Unwrap(err).Stack()).Stack().Msg(fmt.Sprint(errs.Unwrap(err).Code)) 
+	log.Error().Err(errs.Unwrap(err).Stack()).Msg(fmt.Sprint(errs.Unwrap(err).Code)) 
 	// OUTPUT: 2025-02-20T18:29:26-03:00 ERROR ⇝ 500 error"test error | ➜ repository; ➜ service; ➜ handler; ➜ main"
 }
 
@@ -308,78 +310,7 @@ authdata, err := u.userService.VerifyTOTP(id, totpToken.Token)
 	}
 ```
 
-### New
-
-```go
-New(cause error) *Error
-```
-
-Example:
-```go
-err := errs.New(errors.New("error"))
-```
-
-Use Case:
-```go
-func (r *TableRepositoryDb) initUserTable(ctx context.Context) error {
-	_, err := r.tx.Exec(ctx, `CREATE TABLE IF NOT EXISTS users (
-			id UUID PRIMARY KEY NOT NULL,
-			name VARCHAR(15) NOT NULL,
-			last_name BYTEA NOT NULL,				
-			email BYTEA UNIQUE NOT NULL,				
-			password TEXT NOT NULL,		
-			created_at TIMESTAMP NOT NULL			
-		)`)
-	if err != nil {
-		return errs.New(err)
-	}
-	log.Info().Str("context", "TableRepository").Msg("Database - Created users table successfully.")
-	return nil
-}
-```
-
-### FailOnErrLog
-
-
-```go
-FailOnErrLog(err error, msg string)
-```
-
-Example:
-```go
-errs.FailOnErrLog(err, "database failled")
-```
-
-Use Case:
-```go
-if err = Database(); err != nil {
-	errs.FailOnErrLog(err, "database failled")
-}
-```
-
-### PanicBool
-
-```go
-PanicBool(boolean bool, msg string)
-```
-
-### Standard Errors
-
-The package provides standardized errors, such as `IsInvalidError` and `IsRequiredError`. Here's an example of how to use `IsInvalidError`:
-
-```go
-errs.IsInvalidError("Customer", "Must be google uuid")
-```
-
-- IsInvalidError(fieldName, msg string) error
-- IsRequiredError(fieldName, msg string) error
-- FailOnErrLog(err error, msg string)
-- PanicErr(err error, ctx string)
-- PanicBool(boolean bool, msg string)
-
-<br>
-
-### GetHTTPStatusFromPgError 
+#### GetHTTPStatusFromPgError 
 **Compatible with PGX V5 library**
 
 A function to determine HTTP status automatically based on database error message.
@@ -414,6 +345,84 @@ func (r *UserRepositoryDb) UpdateOTP(user *entities.User, ctx Trace.Trace) error
 	return nil
 }
 ```
+
+
+#### New
+
+```go
+New(cause error) *Error
+```
+
+Example:
+```go
+err := errs.New(errors.New("error"))
+```
+
+Use Case:
+```go
+func (r *TableRepositoryDb) initUserTable(ctx context.Context) error {
+	_, err := r.tx.Exec(ctx, `CREATE TABLE IF NOT EXISTS users (
+			id UUID PRIMARY KEY NOT NULL,
+			name VARCHAR(15) NOT NULL,
+			last_name BYTEA NOT NULL,				
+			email BYTEA UNIQUE NOT NULL,				
+			password TEXT NOT NULL,		
+			created_at TIMESTAMP NOT NULL			
+		)`)
+	if err != nil {
+		return errs.New(err)
+	}
+	log.Info().Str("context", "TableRepository").Msg("Database - Created users table successfully.")
+	return nil
+}
+```
+
+#### FailOnErrLog
+
+
+```go
+FailOnErrLog(err error, msg string)
+```
+
+Example:
+```go
+errs.FailOnErrLog(err, "database failled")
+```
+
+Use Case:
+```go
+if err = Database(); err != nil {
+	errs.FailOnErrLog(err, "database failled")
+}
+```
+
+#### PanicErr
+
+```go
+PanicErr(err error, msg string)
+```
+
+#### PanicBool
+
+```go
+PanicBool(boolean bool, msg string)
+```
+
+#### Standard Errors
+
+The package provides standardized errors, such as `IsInvalidError` and `IsRequiredError`. Here's an example of how to use `IsInvalidError`:
+
+```go
+errs.IsInvalidError("Customer", "Must be google uuid")
+```
+
+- IsInvalidError(fieldName, msg string) error
+- IsRequiredError(fieldName, msg string) error
+- FailOnErrLog(err error, msg string)
+- PanicErr(err error, ctx string)
+- PanicBool(boolean bool, msg string)
+
+<br>
 
 
 ## Router Package
