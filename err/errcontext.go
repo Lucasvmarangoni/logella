@@ -11,7 +11,6 @@ type Error struct {
 	Cause   error
 	Code    int
 	Message string
-	added   bool
 	trace   error
 }
 
@@ -31,12 +30,10 @@ func Wrap(cause error, code int) *Error {
 			trace := fmt.Errorf("trace %s", traceValue[len(traceValue)-1])
 
 			if cause != nil {
-				var ok bool
 				if e, ok = cause.(*Error); !ok {
 					e = &Error{
 						Cause: cause,
 						Code:  code,
-						added: true,
 						trace: trace,
 					}
 				}

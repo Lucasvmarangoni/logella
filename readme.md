@@ -83,6 +83,7 @@ log.Error().Err(errs.Trace(err).Stack()).Msg("example error")
 log.Error().Err(errs.Unwrap(err).Stack()).Msg("example error")
 log.Error().Err(errs.Unwrap(err).Stack()).Msg("example error")
 ```
+
 ![alt text](img/log.png)
 
 
@@ -91,11 +92,10 @@ log.Error().Err(errs.Unwrap(err).Stack()).Msg("example error")
 import "github.com/Lucasvmarangoni/logella/err"
 ```
 
-
 **Wrap**: Ctx is used to add the error and the operation that triggered the exception. 
 The operations stack is not returned by ErrCtx, but rather persisted. 
 
-**Trace**: Used to add the trace do stack.
+**Trace**: Used to add the trace to stack.
 
 **Stack**: Stack returns the error along with the operations stack. Used in internals Logs.
 
@@ -105,6 +105,15 @@ The operations stack is not returned by ErrCtx, but rather persisted.
 
 **Unwrap**: It makes the type assertion and is used to access de Error Struct whitout performing other functionality.
 
+**New**: Used to add the trace to stack without http status code. Recommended for incializations exceptions.
+
+**FailOnErrLog**: Used to throw a fatal log in a simple way and with trace stack.
+
+**PanicBool**: Used to throw a panic based on a boolean value, whitout the needs to manualy use an if conditional.
+
+**IsRequiredError**: Used to simplify create a "is requered" error with fmt.Errorf.
+
+**IsInvalidError**: Used to simplify create a "is invalid" error with fmt.Errorf.
 
 ### Error Struct
 
@@ -174,6 +183,23 @@ func repository() error {
 }
 ```
 
+**Recommendation**: When an error is issued in a situation that does not involve a call, such as in a conditional comparison, it is recommended that you encapsulate this inside a function, as follows:
+
+```go
+func checkStatusCode(resp *http.Response) error {
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("status code is not OK. got %d (%s), want %d (%s)",
+			resp.StatusCode, http.StatusText(resp.StatusCode),
+			http.StatusOK, http.StatusText(http.StatusOK))
+	}
+	return nil
+}
+
+if err := checkStatusCode(resp); err != nil {
+		return errs.Trace(err)
+	}
+```
+
 #### Stack
 
 ```go
@@ -192,7 +218,7 @@ authdata, err := u.userService.VerifyTOTP(id, totpToken.Token)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(errs.Unwrap(err).Code)
 		json.NewEncoder(w).Encode(map[string]string{
-			"status":     errs.Status[errs.Unwrap(err).Code],
+			"status":     http.StatusText(errs.Unwrap(err).Code),
 			"message":    fmt.Sprintf("%v", errs.Unwrap(err).ToClient()),
 			"request_id": requestID,
 		})
@@ -225,7 +251,7 @@ authdata, err := u.userService.VerifyTOTP(id, totpToken.Token)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(errs.Unwrap(err).Code)
 		json.NewEncoder(w).Encode(map[string]string{
-			"status":     errs.Status[errs.Unwrap(err).Code],
+			"status":     http.StatusText(errs.Unwrap(err).Code),
 			"message":    fmt.Sprintf("%v", errs.Unwrap(err).ToClient()),
 			"request_id": requestID,
 		})
@@ -273,7 +299,7 @@ authdata, err := u.userService.VerifyTOTP(id, totpToken.Token)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(errs.Unwrap(err).Code)
 		json.NewEncoder(w).Encode(map[string]string{
-			"status":     errs.Status[errs.Unwrap(err).Code],
+			"status":     http.StatusText(errs.Unwrap(err).Code),
 			"message":    fmt.Sprintf("%v", errs.Unwrap(err).ToClient()),
 			"request_id": requestID,
 		})
@@ -282,39 +308,59 @@ authdata, err := u.userService.VerifyTOTP(id, totpToken.Token)
 	}
 ```
 
-### Status
+### New
 
 ```go
-var Status = map[int]string{
-	http.StatusBadRequest:          "BadRequest",
-	http.StatusUnauthorized:        "Unauthorized",
-	http.StatusForbidden:           "Forbidden",
-	http.StatusInternalServerError: "InternalServerError",
-	http.StatusNotFound:            "NotFound",
-	...
-}
+New(cause error) *Error
 ```
 
 Example:
 ```go
-errs.Status[errs.Unwrap(err).Code]
-errs.Status[http.StatusBadrequest]
+err := errs.New(errors.New("error"))
 ```
 
 Use Case:
 ```go
-authdata, err := u.userService.VerifyTOTP(id, totpToken.Token)
+func (r *TableRepositoryDb) initUserTable(ctx context.Context) error {
+	_, err := r.tx.Exec(ctx, `CREATE TABLE IF NOT EXISTS users (
+			id UUID PRIMARY KEY NOT NULL,
+			name VARCHAR(15) NOT NULL,
+			last_name BYTEA NOT NULL,				
+			email BYTEA UNIQUE NOT NULL,				
+			password TEXT NOT NULL,		
+			created_at TIMESTAMP NOT NULL			
+		)`)
 	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(errs.Unwrap(err).Code)
-		json.NewEncoder(w).Encode(map[string]string{
-			"status":     errs.Status[errs.Unwrap(err).Code],
-			"message":    fmt.Sprintf("%v", errs.Unwrap(err).ToClient()),
-			"request_id": requestID,
-		})
-		log.Error().Err(errs.Trace(err).Stack()).Msgf("error validate totp. | (%s)", requestID)
-		return
+		return errs.New(err)
 	}
+	log.Info().Str("context", "TableRepository").Msg("Database - Created users table successfully.")
+	return nil
+}
+```
+
+### FailOnErrLog
+
+
+```go
+FailOnErrLog(err error, msg string)
+```
+
+Example:
+```go
+errs.FailOnErrLog(err, "database failled")
+```
+
+Use Case:
+```go
+if err = Database(); err != nil {
+	errs.FailOnErrLog(err, "database failled")
+}
+```
+
+### PanicBool
+
+```go
+PanicBool(boolean bool, msg string)
 ```
 
 ### Standard Errors
@@ -358,7 +404,7 @@ func (r *UserRepositoryDb) UpdateOTP(user *entities.User, ctx Trace.Trace) error
 			r.key,
 		)
 		if err != nil {
-			return errs.Wrap(err, "tx.Exec", errs.GetHTTPStatusFromPgError(err))
+			return errs.Wrap(err, errs.GetHTTPStatusFromPgError(err))
 		}
 		return nil
 	})

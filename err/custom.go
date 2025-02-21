@@ -2,21 +2,31 @@ package errs
 
 import (
 	"fmt"
+	"runtime"
+	"strings"
+
 	"github.com/rs/zerolog/log"
 )
 
-func IsRequiredError(fieldName, msg string) error {
-	return fmt.Errorf("%s is required. %s", fieldName, msg)
-}
+func New(cause error) *Error {
+	var e *Error
+	if pc, _, _, ok := runtime.Caller(1); ok {
+		if fn := runtime.FuncForPC(pc); fn != nil {
+			traceValue := strings.Split(fn.Name(), ".")
 
-func IsInvalidError(fieldName, msg string) error {
-	return fmt.Errorf("%s is invalid. %s", fieldName, msg)
-}
+			trace := fmt.Errorf("trace %s", traceValue[len(traceValue)-1])
 
-func PanicErr(err error, ctx string) {
-	if err != nil {
-		panic(fmt.Errorf("%w  - ctx: %s", err, ctx))
+			if cause != nil {
+				if e, ok = cause.(*Error); !ok {
+					e = &Error{
+						Cause: cause,
+						trace: trace,
+					}
+				}
+			}
+		}
 	}
+	return e
 }
 
 func PanicBool(boolean bool, msg string) {
@@ -25,8 +35,21 @@ func PanicBool(boolean bool, msg string) {
 	}
 }
 
-func FailOnErrLog(err error, ctx, msg string) {
-	if err != nil {
-		log.Fatal().Stack().Err(err).Msg(msg)
+func FailOnErrLog(err error, msg string) {
+	if pc, _, _, ok := runtime.Caller(1); ok {
+		if fn := runtime.FuncForPC(pc); fn != nil {
+			traceValue := strings.Split(fn.Name(), ".")
+			log.Fatal().Stack().Err(
+				fmt.Errorf("%w ➤ %s", err.(*Error).trace, traceValue[len(traceValue)-1])).
+				Msg(msg)
+		}
 	}
+}
+
+func IsRequiredError(fieldName, msg string) error {
+	return fmt.Errorf("%s is required. %s", fieldName, msg)
+}
+
+func IsInvalidError(fieldName, msg string) error {
+	return fmt.Errorf("%s is invalid. %s", fieldName, msg)
 }
