@@ -3,6 +3,8 @@ package errs
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 )
@@ -23,12 +25,12 @@ func (e *Error) Error() string {
 
 func Wrap(cause error, code int) *Error {
 	var e *Error
-	if pc, _, _, ok := runtime.Caller(1); ok {
+	if pc, file, line, ok := runtime.Caller(1); ok {
+		projectRoot, _ := os.Getwd()
+		relativePath, _ := filepath.Rel(projectRoot, file)
 		if fn := runtime.FuncForPC(pc); fn != nil {
 			traceValue := strings.Split(fn.Name(), ".")
-
-			trace := fmt.Errorf("trace %s", traceValue[len(traceValue)-1])
-
+			trace := fmt.Errorf("path %s:%d trace %s", relativePath, line, traceValue[len(traceValue)-1])
 			if cause != nil {
 				if e, ok = cause.(*Error); !ok {
 					e = &Error{
@@ -43,7 +45,7 @@ func Wrap(cause error, code int) *Error {
 	return e
 }
 
-func Trace(err error) *Error {	
+func Trace(err error) *Error {
 	e := err.(*Error)
 	if pc, _, _, ok := runtime.Caller(1); ok {
 		if fn := runtime.FuncForPC(pc); fn != nil {

@@ -86,6 +86,7 @@ log.Error().Err(errs.Unwrap(err).Stack()).Msg("example error")
 
 ![alt text](img/log.png)
 
+➤ It is possible click on the path value (<u>test/test.go:15</u>) to go directly to file and line.
 
 ### Import
 ```go

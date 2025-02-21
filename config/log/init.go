@@ -38,12 +38,18 @@ func init() {
 		FormatErrFieldValue: func(i interface{}) string {
 			value := failOnError(i)
 
+			formattedFile := Format(instanceColorsConfig.Trace, "path")
+			Str := strings.ReplaceAll(value, "path", formattedFile)
+
+			formattedLine := Format(instanceColorsConfig.Trace, ":")
+			Str = strings.ReplaceAll(Str, ":", formattedLine)
+
 			formattedTrace := Format(instanceColorsConfig.Trace, "trace")
-			Str := strings.ReplaceAll(value, "trace", formattedTrace)			
+			Str = strings.ReplaceAll(Str, "trace", formattedTrace)
 
 			formattedTraceArrow := Format(instanceColorsConfig.Trace, "➤")
-			Str = strings.ReplaceAll(Str, "➤", formattedTraceArrow)		
-		
+			Str = strings.ReplaceAll(Str, "➤", formattedTraceArrow)
+
 			return Str
 		},
 		FormatErrFieldName: func(i interface{}) string {
