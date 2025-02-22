@@ -211,7 +211,7 @@ Or use Trace Method, like above:
 This method can be used in different situations when you needed to inject your especific trace manually.
 
 - When an error is throw inside an anonymous function;
-- When an error is throw  external library method; 
+- When an error is throw from an external library method; 
 - Whem an error is issued in a situation that does not involve a call, such as in a conditional comparison.
 
 ```go

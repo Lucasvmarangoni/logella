@@ -47,12 +47,7 @@ func Wrap(cause error, code int) *Error {
 
 func (e *Error) Trace(trace string) *Error {
 	e.trace = fmt.Errorf("%s", trace)
-	if pc, _, _, ok := runtime.Caller(1); ok {
-		if fn := runtime.FuncForPC(pc); fn != nil {
-			traceValue := strings.Split(fn.Name(), ".")
-			e.trace = fmt.Errorf("%w ➤ %s", e.trace, traceValue[len(traceValue)-1])
-		}
-	}
+	Trace(e)
 	return e
 }
 
