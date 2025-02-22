@@ -499,7 +499,7 @@ func (ro *Router) InitializeRoute(r chi.Router, path string, handler http.Handle
 ```
 
 ```go
-router.InitializeRoute(r, "/jwt", u.userHandler.Authentication)
+router.InitializeRoute(r, "/login", u.userHandler.Authentication)
 ```
 
 ### Method Function
@@ -511,7 +511,7 @@ func (ro *Router) Method(m string) *Router
 ```
 
 ```go
-router.Method("POST").InitializeRoute(r, "/jwt", u.userHandler.Authentication)
+router.Method(router.POST).InitializeRoute(r, "/login", u.userHandler.Authentication)
 ```
 
 ### Prefix Function
@@ -523,5 +523,5 @@ func (ro *Router) Prefix(p string) *Router
 ```
 
 ```go
-router.Method("POST").Prefix("/authn").InitializeRoute(r, "/jwt", u.userHandler.Authentication)
+router.Method(router.POST).Prefix("/api").InitializeRoute(r, "/login", u.userHandler.Authentication)
 ```
