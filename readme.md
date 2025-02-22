@@ -98,6 +98,8 @@ The operations stack is not returned by ErrCtx, but rather persisted.
 
 <a href="#trace">**Trace**</a>: Used to add the trace to stack.
 
+<a href="#trace-method">**Trace (method)**</a>: Used to add the trace manuelly to stack.
+
 <a href="#stack">**Stack**</a>: Stack returns the error along with the operations stack. Used in internals Logs.
 
 <a href="#toclient">**ToClient**</a>: Used to send error message to client.
@@ -200,6 +202,40 @@ func checkStatusCode(resp *http.Response) error {
 if err := checkStatusCode(resp); err != nil {
 		return errs.Trace(err)
 	}
+```
+
+Or use Trace Method, like above:
+
+
+#### Trace-method
+This method can be used in different situations when you needed to inject your especific trace manually.
+
+- When an error is throw inside an anonymous function;
+- When an error is throw  external library method; 
+- Whem an error is issued in a situation that does not involve a call, such as in a conditional comparison.
+
+```go
+(e *Error) Trace(trace string) *Error
+```
+Example:
+```go
+errs.Wrap(err, http.StatusBadRequest).Trace("AnonymousFunction")
+```
+
+Use Case:
+```go
+func ExternalMethod() error {
+	return errors.New("test error")
+}
+
+func Repository() error {
+err := ExternalMethod()
+	if err != nil {
+		return errs.Wrap(err, http.StatusBadRequest).Trace("ExternalMethod")
+	}
+	return nil
+}
+// ExternalMethod ➤ Repository ➤ service ➤ handler ➤ main"
 ```
 
 #### Stack
