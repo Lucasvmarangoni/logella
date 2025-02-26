@@ -494,8 +494,23 @@ import "github.com/Lucasvmarangoni/logella/router"
 ### Use
 
 ```go
+router := router.NewRouter()
+r := router.Chi
+
+userRouter := routers.NewUsersRouter(userHandler, router)
+
+r.Route("/", func(r chi.Router) {
+		r.Use(jwtauth.Verifier(tokenAuth))
+		r.Use(jwtauth.Authenticator)
+		userRouter.UserRoutes(r)	
+})
+```
+
+```go
 router.Method(router.POST).Prefix("/api").Map("/login", u.userHandler.Authentication)
 ```
+
+<a href="#router">**Router**</a>: The Router Struct.
 
 <a href="#newrouter">**NewRouter**</a>: To create a new instance of the `Router`, and chi.Router instance (chi.NewRouter()).
 
@@ -505,13 +520,18 @@ router.Method(router.POST).Prefix("/api").Map("/login", u.userHandler.Authentica
 
 <a href="#prefix">**Prefix**</a>: The `Prefix` function sets a prefix for the route, if there is one:
 
-#### Instance Creation
+#### Router
 
 ```go
-router := router.NewRouter()
+type Router struct {
+	Chi    chi.Router
+	method HTTPMethod
+	prefix string
+}
 ```
 
-Example:
+#### Instance Creation
+
 ```go
 func NewRouter() *Router {
 	r := &Router{
@@ -519,6 +539,10 @@ func NewRouter() *Router {
 	}
 	return r
 }
+```
+
+```go
+router := router.NewRouter()
 ```
 
 #### Map 
@@ -532,6 +556,17 @@ func (ro *Router) Map(path string, handler http.HandlerFunc)
 
 ```go
 func (ro *Router) Method(m string) *Router
+```
+
+```go
+type HTTPMethod string
+const (
+	POST   HTTPMethod = "POST"
+	GET    HTTPMethod = "GET"
+	PUT    HTTPMethod = "PUT"
+	PATCH  HTTPMethod = "PATCH"
+	DELETE HTTPMethod = "DELETE"
+)
 ```
 
 #### Prefix 
