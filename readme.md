@@ -93,6 +93,10 @@ log.Error().Err(errs.Unwrap(err).Stack()).Msg("example error")
 import "github.com/Lucasvmarangoni/logella/err"
 ```
 
+### Use
+
+<a href="#error">**Error**</a>: the Error Struct.
+
 <a href="#wrap">**Wrap**</a>: Ctx is used to add the error and the operation that triggered the exception. 
 The operations stack is not returned by ErrCtx, but rather persisted. 
 
@@ -122,7 +126,8 @@ The operations stack is not returned by ErrCtx, but rather persisted.
 
 <a href="#isinvaliderror">**IsInvalidError**</a>: Used to simplify create a "is invalid" error with fmt.Errorf.
 
-### Error Struct
+
+#### Error
 ```go
 type Error struct {
 	Cause   error   // The actual error thrown
@@ -476,52 +481,48 @@ import "github.com/Lucasvmarangoni/logella/router"
 ### Use
 
 ```go
+router.Method(router.POST).Prefix("/api").Map("/login", u.userHandler.Authentication)
+```
+
+<a href="#newrouter">**NewRouter**</a>: To create a new instance of the `Router`, and chi.Router instance (chi.NewRouter()).
+
+<a href="#map">**Map**</a>: The `Map` function is the main function of the `Router` package. It takes a chi router, a path, and a handler function as arguments:
+
+<a href="#method">**Method**</a>: The `Method` function sets the HTTP method for the route. It accepts a string argument, which can be either uppercase or lowercase:
+
+<a href="#prefix">**Prefix**</a>: The `Prefix` function sets a prefix for the route, if there is one:
+
+#### Instance Creation
+
+```go
 router := router.NewRouter()
 ```
 
-### Instance Creation
-
-To create a new instance of the `Router`, use the `NewRouter` function:
-
+Example:
 ```go
 func NewRouter() *Router {
-    ro := &Router{}    
-    return ro
+	r := &Router{
+		Chi: chi.NewRouter(),
+	}
+	return r
 }
 ```
 
-### InitializeRoute Function
-
-The `InitializeRoute` function is the main function of the `Router` package. It takes a chi router, a path, and a handler function as arguments:
+#### Map 
 
 ```go
-func (ro *Router) InitializeRoute(r chi.Router, path string, handler http.HandlerFunc)
+func (ro *Router) Map(path string, handler http.HandlerFunc)
 ```
+*Required Method method.*
 
-```go
-router.InitializeRoute(r, "/login", u.userHandler.Authentication)
-```
-
-### Method Function
-
-The `Method` function sets the HTTP method for the route. It accepts a string argument, which can be either uppercase or lowercase:
+#### Method 
 
 ```go
 func (ro *Router) Method(m string) *Router
 ```
 
-```go
-router.Method(router.POST).InitializeRoute(r, "/login", u.userHandler.Authentication)
-```
-
-### Prefix Function
-
-The `Prefix` function sets a prefix for the route, if there is one:
+#### Prefix 
 
 ```go
 func (ro *Router) Prefix(p string) *Router 
-```
-
-```go
-router.Method(router.POST).Prefix("/api").InitializeRoute(r, "/login", u.userHandler.Authentication)
 ```
