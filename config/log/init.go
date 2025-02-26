@@ -14,11 +14,11 @@ import (
 
 func init() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false, TimeFormat: time.RFC3339,
-		FormatMessage: func(i interface{}) string {
+		FormatMessage: func(i any) string {
 			value := failOnError(i)
 			return Format(instanceColorsConfig.Message, strings.ToUpper(value))
 		},
-		FormatLevel: func(i interface{}) string {
+		FormatLevel: func(i any) string {
 			level := failOnError(i)
 			switch level {
 			case "info":
@@ -35,7 +35,7 @@ func init() {
 				return level
 			}
 		},
-		FormatErrFieldValue: func(i interface{}) string {
+		FormatErrFieldValue: func(i any) string {
 			value := failOnError(i)
 
 			formattedFile := Format(instanceColorsConfig.Trace, "path")
@@ -52,7 +52,7 @@ func init() {
 
 			return Str
 		},
-		FormatErrFieldName: func(i interface{}) string {
+		FormatErrFieldName: func(i any) string {
 			value := failOnError(i)
 			return value
 		},
@@ -65,7 +65,7 @@ func init() {
 	}
 }
 
-func failOnError(i interface{}) string {
+func failOnError(i any) string {
 	value, ok := i.(string)
 	if !ok {
 		return "unknown"
