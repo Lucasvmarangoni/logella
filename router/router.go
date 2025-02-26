@@ -8,7 +8,6 @@ import (
 )
 
 type HTTPMethod string
-
 const (
 	POST   HTTPMethod = "POST"
 	GET    HTTPMethod = "GET"
@@ -18,38 +17,41 @@ const (
 )
 
 type Router struct {
+	Chi    chi.Router
 	method HTTPMethod
 	prefix string
 }
 
-func (ro *Router) InitializeRoute(r chi.Router, path string, handler http.HandlerFunc) {
+func (r *Router) Map(pattern string, handler http.HandlerFunc) {
 
-	switch ro.method {
+	switch r.method {
 	case POST:
-		r.Post(path, handler)
+		r.Chi.Post(pattern, handler)
 	case GET:
-		r.Get(path, handler)
+		r.Chi.Get(pattern, handler)
 	case PUT:
-		r.Put(path, handler)
+		r.Chi.Put(pattern, handler)
 	case PATCH:
-		r.Patch(path, handler)
+		r.Chi.Patch(pattern, handler)
 	case DELETE:
-		r.Delete(path, handler)
+		r.Chi.Delete(pattern, handler)
 	}
-	log.Info().Str("context", "Router").Msgf("Mapped - Initialized: (%s) %s%s ", ro.method, ro.prefix, path)
+	log.Info().Str("context", "Router").Msgf("Mapped - Initialized: (%s) %s%s ", r.method, r.prefix, pattern)
 }
 
-func (ro *Router) Method(m HTTPMethod) *Router {
-	ro.method = m
-	return ro
+func (r *Router) Method(m HTTPMethod) *Router {
+	r.method = m
+	return r
 }
 
-func (ro *Router) Prefix(p string) *Router {
-	ro.prefix = p
-	return ro
+func (r *Router) Prefix(p string) *Router {
+	r.prefix = p
+	return r
 }
 
 func NewRouter() *Router {
-	ro := &Router{}
-	return ro
+	r := &Router{
+		Chi: chi.NewRouter(),
+	}
+	return r
 }
