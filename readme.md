@@ -95,10 +95,34 @@ import "github.com/Lucasvmarangoni/logella/err"
 
 ### Use
 
+```go
+func main() {
+	_, err := handler()
+	log.Error().Err(errs.Unwrap(err).Stack()).Msg(fmt.Sprint(errs.Unwrap(err).Code)) 
+	log.Error().Err(errs.Trace(err).ToClient()).Msg(fmt.Sprint(errs.Unwrap(err).Code))
+}
+
+func handler() (string, error) {
+	_, err := service()
+	return "", errs.Trace(err)
+}
+
+func service() (string, error) {
+	err := repository()
+	if err != nil {
+		return "", errs.Trace(err)
+	}
+	return "", nil
+}
+
+func repository() error {
+	return errs.Wrap(errors.New("test error"), 500)
+}
+```
+
 <a href="#error">**Error**</a>: the Error Struct.
 
-<a href="#wrap">**Wrap**</a>: Ctx is used to add the error and the operation that triggered the exception. 
-The operations stack is not returned by ErrCtx, but rather persisted. 
+<a href="#wrap">**Wrap**</a>: Used to add the new error and the trace that throw the exception. 
 
 <a href="#trace">**Trace**</a>: Used to add the trace to stack.
 
@@ -168,17 +192,6 @@ errs.Trace(err)
 
 Use Case:
 ```go
-func main() {
-	_, err := handler()
-	log.Error().Err(errs.Unwrap(err).Stack()).Msg(fmt.Sprint(errs.Unwrap(err).Code)) 
-	// OUTPUT: 2025-02-20T18:29:26-03:00 ERROR ⇝ 500 error"test error | ➜ repository; ➜ service; ➜ handler; ➜ main"
-}
-
-func handler() (string, error) {
-	_, err := service()
-	return "", errs.Trace(err)
-}
-
 func service() (string, error) {
 	err := repository()
 	if err != nil {
