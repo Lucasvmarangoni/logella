@@ -8,45 +8,43 @@ import (
 )
 
 type HTTPMethod string
+
 const (
-	POST   HTTPMethod = "POST"
-	GET    HTTPMethod = "GET"
-	PUT    HTTPMethod = "PUT"
-	PATCH  HTTPMethod = "PATCH"
-	DELETE HTTPMethod = "DELETE"
+	post   HTTPMethod = "POST"
+	get    HTTPMethod = "GET"
+	put    HTTPMethod = "PUT"
+	patch  HTTPMethod = "PATCH"
+	delete HTTPMethod = "DELETE"
 )
 
 type Router struct {
 	Chi    chi.Router
-	method HTTPMethod
-	prefix string
+	Prefix string
 }
 
-func (r *Router) Map(pattern string, handler http.HandlerFunc) {
-
-	switch r.method {
-	case POST:
-		r.Chi.Post(pattern, handler)
-	case GET:
-		r.Chi.Get(pattern, handler)
-	case PUT:
-		r.Chi.Put(pattern, handler)
-	case PATCH:
-		r.Chi.Patch(pattern, handler)
-	case DELETE:
-		r.Chi.Delete(pattern, handler)
-	}
-	log.Info().Str("context", "Router").Msgf("Mapped - Initialized: (%s) %s%s ", r.method, r.prefix, pattern)
+func (r *Router) Post(pattern string, handler http.HandlerFunc) {
+	r.Chi.Post(pattern, handler)
+	log.Info().Str("context", "Router").Msgf("Mapped - Initialized: (%s) %s%s ", post, r.Prefix, pattern)
 }
 
-func (r *Router) Method(m HTTPMethod) *Router {
-	r.method = m
-	return r
+func (r *Router) Get(pattern string, handler http.HandlerFunc) {
+	r.Chi.Get(pattern, handler)
+	log.Info().Str("context", "Router").Msgf("Mapped - Initialized: (%s) %s%s ", get, r.Prefix, pattern)
 }
 
-func (r *Router) Prefix(p string) *Router {
-	r.prefix = p
-	return r
+func (r *Router) Put(pattern string, handler http.HandlerFunc) {
+	r.Chi.Put(pattern, handler)
+	log.Info().Str("context", "Router").Msgf("Mapped - Initialized: (%s) %s%s ", put, r.Prefix, pattern)
+}
+
+func (r *Router) Path(pattern string, handler http.HandlerFunc) {
+	r.Chi.Patch(pattern, handler)
+	log.Info().Str("context", "Router").Msgf("Mapped - Initialized: (%s) %s%s ", patch, r.Prefix, pattern)
+}
+
+func (r *Router) Delete(pattern string, handler http.HandlerFunc) {
+	r.Chi.Delete(pattern, handler)
+	log.Info().Str("context", "Router").Msgf("Mapped - Initialized: (%s) %s%s ", delete, r.Prefix, pattern)
 }
 
 func NewRouter() *Router {
