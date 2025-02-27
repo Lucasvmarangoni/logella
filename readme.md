@@ -507,18 +507,19 @@ r.Route("/", func(r chi.Router) {
 ```
 
 ```go
-router.Method(router.POST).Prefix("/api").Map("/login", u.userHandler.Authentication)
+router.Route("/authn", func() {
+	router.Post("/login", u.userHandler.Authentication)
+})
 ```
 
 <a href="#router">**Router**</a>: The Router Struct.
 
 <a href="#newrouter">**NewRouter**</a>: To create a new instance of the `Router`, and chi.Router instance (chi.NewRouter()).
 
-<a href="#map">**Map**</a>: The `Map` function is the main function of the `Router` package. It takes a chi router, a path, and a handler function as arguments:
+<a href="#methods">**Methods**</a>: All http Methods. Used in the same way as in go-chi lib.
 
-<a href="#method">**Method**</a>: The `Method` function sets the HTTP method for the route. It accepts a string argument, which can be either uppercase or lowercase:
+<a href="#route">**Route**</a>: Reclaces go-chi's route method.
 
-<a href="#prefix">**Prefix**</a>: The `Prefix` function sets a prefix for the route, if there is one:
 
 #### Router
 
@@ -545,32 +546,18 @@ func NewRouter() *Router {
 router := router.NewRouter()
 ```
 
-#### Map 
+#### Methods
 
 ```go
-func (ro *Router) Map(path string, handler http.HandlerFunc)
-```
-*Required Method method.*
-
-#### Method 
-
-```go
-func (ro *Router) Method(m string) *Router
+(r *Router) Post(pattern string, handler http.HandlerFunc)
+(r *Router) Get(pattern string, handler http.HandlerFunc)
+(r *Router) Put(pattern string, handler http.HandlerFunc)
+(r *Router) Path(pattern string, handler http.HandlerFunc)
+(r *Router) Delete(pattern string, handler http.HandlerFunc)
 ```
 
-```go
-type HTTPMethod string
-const (
-	POST   HTTPMethod = "POST"
-	GET    HTTPMethod = "GET"
-	PUT    HTTPMethod = "PUT"
-	PATCH  HTTPMethod = "PATCH"
-	DELETE HTTPMethod = "DELETE"
-)
-```
-
-#### Prefix 
+#### Route
 
 ```go
-func (ro *Router) Prefix(p string) *Router 
+(r *Router) Route(pattern string, fn func())
 ```
