@@ -9,6 +9,7 @@ import (
 
 	"github.com/Lucasvmarangoni/logella/router"
 	"github.com/go-chi/chi"
+	"github.com/stretchr/testify/assert"
 )
 
 func handler_user(w http.ResponseWriter, r *http.Request) {
@@ -67,14 +68,10 @@ func TestRoutes(t *testing.T) {
 			r := httptest.NewRecorder()
 			router.ServeHTTP(r, req)
 
-			if r.Code != test.status {
-				t.Errorf("%s %s: expected status %d, got %d", test.method, test.url, test.status, r.Code)
-			}
+			assert.Equal(t, test.status, r.Code, "%s %s: expected status %d, got %d", test.method, test.url, test.status, r.Code)
 
 			respBody, _ := io.ReadAll(r.Body)
-			if string(respBody) != test.body+"\n" {
-				t.Errorf("%s %s: expected body %s, got %s", test.method, test.url, test.body, string(respBody))
-			}
+			assert.Equal(t, test.body+"\n", string(respBody), "%s %s: expected body %s, got %s", test.method, test.url, test.body, string(respBody))
 		})
 	}
 }
