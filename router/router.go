@@ -1,6 +1,7 @@
 package router
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -22,10 +23,15 @@ type Router struct {
 	Prefix string
 }
 
-func (r *Router) Route(pattern string, fn func()) {
+func (r *Router) Route(pattern string, fn func(sub *Router)) chi.Router {
+	if fn == nil {
+		panic(fmt.Sprintf("chi: attempting to Route() a nil subrouter on '%s'", pattern))
+	}
 	r.Prefix = pattern
-	r.Chi.Mount(pattern, r.Chi)
-	fn()
+	subRouter := NewRouter()
+	r.Chi.Mount(pattern, subRouter.Chi)
+	fn(subRouter)
+	return subRouter.Chi
 }
 
 func (r *Router) Post(pattern string, handler http.HandlerFunc) {
