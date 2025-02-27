@@ -22,6 +22,12 @@ type Router struct {
 	Prefix string
 }
 
+func (r *Router) Route(pattern string, fn func()) {
+	r.Prefix = pattern
+	r.Chi.Mount(pattern, r.Chi)
+	fn()
+}
+
 func (r *Router) Post(pattern string, handler http.HandlerFunc) {
 	r.Chi.Post(pattern, handler)
 	log.Info().Str("context", "Router").Msgf("Mapped - Initialized: (%s) %s%s ", post, r.Prefix, pattern)
