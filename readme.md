@@ -507,8 +507,11 @@ r.Route("/", func(r chi.Router) {
 ```
 
 ```go
-router.Route("/authn", func() {
-	router.Post("/login", u.userHandler.Authentication)
+router.Route("/authn", func(r *router.Router) {
+	r.Post("/login", u.userHandler.Authentication)
+	r.Chi.Group(func(r chi.Router){
+		r.Post("/login", u.userHandler.Authentication)
+	})
 })
 ```
 
@@ -559,5 +562,5 @@ router := router.NewRouter()
 #### Route
 
 ```go
-(r *Router) Route(pattern string, fn func())
+(r *Router) Route(pattern string, fn func(sub *Router))
 ```
