@@ -253,7 +253,7 @@ err := ExternalMethod()
 	}
 	return nil
 }
-// ExternalMethod ➤ Repository ➤ service ➤ handler ➤ main"
+// path main.go:105 trace ExternalMethod:repository ➤ service ➤ handler ➤ main"
 ```
 
 #### Stack
