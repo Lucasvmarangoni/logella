@@ -40,13 +40,17 @@ import "github.com/Lucasvmarangoni/logella/config/log"
 **ConfigDefault**: It has pre-defined log color settings, meaning there is no need to specify a any parameter.
 
 ```go
-logger.ConfigDefault()
+logger.ConfigDefault(out io.Writer)
+```
+Example: 
+```go
+logger.ConfigDefault(os.Stdout)
 ```
 
 **ConfigCustom**: Allows you to customize log level, message, and operation colors.
 
 ```go
-ConfigCustom(info, err, warn, debug, fatal, message, trace colors)
+ConfigCustom(info, err, warn, debug, fatal, message, trace colors, , out io.Writer)
 ```
 
 The parameters must be passed using the variables already defined by the package with the name of the colors.
@@ -57,7 +61,7 @@ Example:
 
 
 ```go
-logger.ConfigCustom(logger.Green, logger.Red, logger.Yellow, logger.Cyan, logger.Red, logger.Magenta, logger.Blue)
+logger.ConfigCustom(logger.Green, logger.Red, logger.Yellow, logger.Cyan, logger.Red, logger.Magenta, logger.Blue, os.Stdout)
 ```
 
 **Use Case**
