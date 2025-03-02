@@ -47,7 +47,14 @@ func Wrap(cause error, code int) *Error {
 
 func (e *Error) Trace(trace string) *Error {
 	e.trace = fmt.Errorf("%s", trace)
-	Trace(e)
+	if pc, file, line, ok := runtime.Caller(1); ok {
+		projectRoot, _ := os.Getwd()
+		relativePath, _ := filepath.Rel(projectRoot, file)
+		if fn := runtime.FuncForPC(pc); fn != nil {
+			traceValue := strings.Split(fn.Name(), ".")
+			e.trace = fmt.Errorf("path %s:%d trace %w:%s", relativePath, line, e.trace, traceValue[len(traceValue)-1])
+		}
+	}
 	return e
 }
 
