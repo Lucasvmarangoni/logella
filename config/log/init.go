@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	"io"
 	"strings"
 	"time"
 
@@ -9,11 +10,13 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/rs/zerolog/pkgerrors"
 
-	"os"
 )
 
-func init() {
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout, NoColor: false, TimeFormat: time.RFC3339,
+func Init(out io.Writer) {
+	if out == nil {
+		panic("output cannot be nil")
+	}
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: out, NoColor: false, TimeFormat: time.RFC3339,
 		FormatMessage: func(i any) string {
 			value := failOnError(i)
 			return Format(instanceColorsConfig.Message, strings.ToUpper(value))

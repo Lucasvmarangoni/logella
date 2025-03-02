@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	"io"
 	"sync"
 
 	"github.com/fatih/color"
@@ -33,8 +34,9 @@ const (
 	White
 )
 
-func GetLogColorsConfig() {
+func ConfigDefault(out io.Writer) {
 	onceConfig.Do(func() {
+		Init(out)
 		instanceColorsConfig = &LogColorsConfig{
 			Info:    Green,
 			Error:   Red,
@@ -45,15 +47,11 @@ func GetLogColorsConfig() {
 			Trace:   Blue,
 		}
 	})
-
 }
 
-func ConfigDefault() {
-	GetLogColorsConfig()
-}
-
-func ConfigCustom(info, err, warn, debug, fatal, message, trace colors) {
+func ConfigCustom(info, err, warn, debug, fatal, message, trace colors, out io.Writer) {
 	onceConfig.Do(func() {
+		Init(out)
 		instanceColorsConfig = &LogColorsConfig{
 			Info:    info,
 			Error:   err,
