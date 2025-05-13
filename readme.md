@@ -513,6 +513,14 @@ r.Route("/", func() {
 router.Route("/authn", func() {
 	router.Post("/login", u.userHandler.Authentication)
 	router.Group(func(){
+		router.Use(httprate.Limit(
+			4,
+			60*time.Minute,
+			httprate.WithKeyFuncs(httprate.KeyByRealIP, httprate.KeyByEndpoint),
+			httprate.WithLimitHandler(func(w http.ResponseWriter, r *http.Request) {
+				http.Error(w, "Rate limit exceeded", http.StatusTooManyRequests)
+			}),
+		))	
 		router.Post("/login", u.userHandler.Authentication)
 	})
 })
