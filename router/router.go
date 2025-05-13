@@ -20,6 +20,7 @@ const (
 
 type Router struct {
 	Chi    chi.Router
+	mux    *chi.Mux
 	Prefix string
 }
 
@@ -34,13 +35,20 @@ func (r *Router) Route(pattern string, fn func()) chi.Router {
 	return subRouter.Chi
 }
 
-func (r *Router) Group(fn func()) *Router {	
+func (r *Router) Group(fn func()) *Router {
 	if fn != nil {
-		fn()
+		r.mux.Group(func(chi.Router) {
+			fn()
+		})
+
 	}
 	return r
 }
 
+func (r *Router) Use(ms ...func(http.Handler) http.Handler) *Router {
+	r.mux.Use(ms...)
+	return r
+}
 
 func (r *Router) Post(pattern string, handler http.HandlerFunc) {
 	r.Chi.Post(pattern, handler)
@@ -70,6 +78,7 @@ func (r *Router) Delete(pattern string, handler http.HandlerFunc) {
 func NewRouter() *Router {
 	r := &Router{
 		Chi: chi.NewRouter(),
+		mux: chi.NewMux(),
 	}
 	return r
 }
