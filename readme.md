@@ -512,9 +512,9 @@ r.Route("/", func(r chi.Router) {
 
 ```go
 router.Route("/authn", func(r *router.Router) {
-	r.Post("/login", u.userHandler.Authentication)
+	router.Post("/login", u.userHandler.Authentication)
 	r.Chi.Group(func(r chi.Router){
-		r.Post("/login", u.userHandler.Authentication)
+		router.Post("/login", u.userHandler.Authentication)
 	})
 })
 ```
