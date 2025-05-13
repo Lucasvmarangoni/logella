@@ -54,6 +54,14 @@ func testRouter() chi.Router {
 		R.Get("/get1", handler_user1)
 		R.Post("/post1", handler_user)
 		R.Group(func(){
+			R.Use(httprate.Limit(
+				4,
+				60*time.Minute,
+				httprate.WithKeyFuncs(httprate.KeyByRealIP, httprate.KeyByEndpoint),
+				httprate.WithLimitHandler(func(w http.ResponseWriter, r *http.Request) {
+					http.Error(w, "Rate limit exceeded", http.StatusTooManyRequests)
+				}),
+			))	
 			R.Post("/put1", handler_group)
 		})
 	})
