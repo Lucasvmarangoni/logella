@@ -23,16 +23,24 @@ type Router struct {
 	Prefix string
 }
 
-func (r *Router) Route(pattern string, fn func(sub *Router)) chi.Router {
+func (r *Router) Route(pattern string, fn func()) chi.Router {
 	if fn == nil {
 		panic(fmt.Sprintf("chi: attempting to Route() a nil subrouter on '%s'", pattern))
 	}
 	r.Prefix = pattern
 	subRouter := NewRouter()
 	r.Chi.Mount(pattern, subRouter.Chi)
-	fn(subRouter)
+	fn()
 	return subRouter.Chi
 }
+
+func (r *Router) Group(fn func()) *Router {	
+	if fn != nil {
+		fn()
+	}
+	return r
+}
+
 
 func (r *Router) Post(pattern string, handler http.HandlerFunc) {
 	r.Chi.Post(pattern, handler)
