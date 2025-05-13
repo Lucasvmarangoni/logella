@@ -6,12 +6,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
 	"github.com/Lucasvmarangoni/logella/router"
 	"github.com/go-chi/chi"
+	"github.com/go-chi/httprate"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -37,6 +39,14 @@ func testRouter() chi.Router {
 	R.Route("/user", func() {
 		R.Get("/get", handler_user)
 		R.Post("/post", handler_user1)
+		R.Use(httprate.Limit(
+			4,
+			60*time.Minute,
+			httprate.WithKeyFuncs(httprate.KeyByRealIP, httprate.KeyByEndpoint),
+			httprate.WithLimitHandler(func(w http.ResponseWriter, r *http.Request) {
+				http.Error(w, "Rate limit exceeded", http.StatusTooManyRequests)
+			}),
+		))	
 		R.Post("/put", handler_user)
 	})
 
