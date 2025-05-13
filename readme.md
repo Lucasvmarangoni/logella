@@ -500,10 +500,9 @@ import "github.com/Lucasvmarangoni/logella/router"
 ```go
 router := router.NewRouter()
 r := router.Chi
-
 userRouter := routers.NewUsersRouter(userHandler, router)
 
-r.Route("/", func(r chi.Router) {
+r.Route("/", func() {
 		r.Use(jwtauth.Verifier(tokenAuth))
 		r.Use(jwtauth.Authenticator)
 		userRouter.UserRoutes(r)	
@@ -511,9 +510,9 @@ r.Route("/", func(r chi.Router) {
 ```
 
 ```go
-router.Route("/authn", func(r *router.Router) {
+router.Route("/authn", func() {
 	router.Post("/login", u.userHandler.Authentication)
-	r.Chi.Group(func(r chi.Router){
+	router.Group(func(){
 		router.Post("/login", u.userHandler.Authentication)
 	})
 })
