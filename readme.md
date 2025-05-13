@@ -540,8 +540,8 @@ router.Route("/authn", func() {
 ```go
 type Router struct {
 	Chi    chi.Router
-	method HTTPMethod
-	prefix string
+	mux    *chi.Mux
+	Prefix string
 }
 ```
 
@@ -563,6 +563,8 @@ router := router.NewRouter()
 #### Methods
 
 ```go
+(r *Router) Group(fn func()) *Router
+(r *Router) Use(ms ...func(http.Handler) http.Handler) *Router
 (r *Router) Post(pattern string, handler http.HandlerFunc)
 (r *Router) Get(pattern string, handler http.HandlerFunc)
 (r *Router) Put(pattern string, handler http.HandlerFunc)
