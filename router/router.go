@@ -29,10 +29,9 @@ func (r *Router) Route(pattern string, fn func()) chi.Router {
 		panic(fmt.Sprintf("chi: attempting to Route() a nil subrouter on '%s'", pattern))
 	}
 	r.Prefix = pattern
-	subRouter := NewRouter()
-	r.Chi.Mount(pattern, subRouter.Chi)
+	r.Chi.Mount(pattern, r.Chi)
 	fn()
-	return subRouter.Chi
+	return r.Chi
 }
 
 func (r *Router) Group(fn func())  {
