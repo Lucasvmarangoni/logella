@@ -20,10 +20,15 @@ A simple loggers and errors library.
 - <a href="#errs-package">
    Errs
   </a> 
-
+  
 - <a href="#router-package">
     Router
-</a>       
+</a>    
+
+- <a href="#response-package">
+    Response
+</a>  
+
 </div>
 
 <br><br>
@@ -576,4 +581,66 @@ router := router.NewRouter()
 
 ```go
 (r *Router) Route(pattern string, fn func(sub *Router))
+```
+
+## Response Package
+
+<a href="#new">**New**</a>: Creates a new Response instance from an error. Wrap your error with a status code using errs.Wrap.
+
+<a href="#log">**Log**</a>: Sets a log message to be included in the application log. Should come after Req and User, if present.
+
+<a href="#req">**Req**</a>: Adds the request ID to the response.>
+
+<a href="#user">**User**</a>: Adds the user ID to the response.
+
+<a href="#date">**Date**</a>: Sets a fixed timestamp for the response. Useful for tests or consistent logging.
+
+<a href="#doc">**Doc**</a>: Adds a documentation string (e.g., a URL or identifier) to the response.
+
+<a href="#send">**Send**</a>: Finalizes the chain. Writes the JSON response and status code to the http.ResponseWriter.
+
+### Use Case
+
+```go
+response.New(errs.Wrap(errors.New("some error"), http.StatusBadRequest)).
+		Req("123").
+		User("12345").
+		Log("LOG MESSAGE").
+		Date(&fixed).
+		Send(w)
+```
+
+### Struct
+```go
+type Response struct {
+	Err           error      `json:"-"`
+	Error         string     `json:"error"`
+	Message       string     `json:"message"`
+	Status        string     `json:"status"`
+	RequestID     string     `json:"request_id,omitempty"`
+	UserID        string     `json:"user_id,omitempty"`
+	Timestamp     *time.Time `json:"timestamp,omitempty"`
+	Documentation string     `json:"documentation,omitempty"`
+}
+```
+
+### Constructor
+```go
+New(err error) *Response
+```
+### Parameters Methods
+
+```go
+(r *Response) Log(msg string) *Response
+(r *Response) Req(requestID string) *Response
+(r *Response) User(userID string) *Response
+(r *Response) Date(timestamp *time.Time) *Response
+(r *Response) Doc(documentation string) *Response
+```
+- Log should come after Req and User, if present.
+
+### Send
+Must be called at the end of the chain.
+```go
+(r *Response) Send(w http.ResponseWriter)
 ```
