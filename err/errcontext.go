@@ -69,6 +69,22 @@ func Trace(err error) *Error {
 	return e
 }
 
+func TraceForResponsePkg(err error) *Error {
+	e := err.(*Error)
+	if pc, _, _, ok := runtime.Caller(2); ok {
+		if fn := runtime.FuncForPC(pc); fn != nil {
+			traceValue := strings.Split(fn.Name(), ".")
+			currentFn := traceValue[len(traceValue)-1]
+
+			// Se a última função já for igual à atual, não adiciona
+			if !strings.HasSuffix(e.trace.Error(), currentFn) {
+				e.trace = fmt.Errorf("%w ➤ %s", e.trace, currentFn)
+			}
+		}
+	}
+	return e
+}
+
 func (e *Error) Msg(message string) *Error {
 	e.Message = message
 	return e
