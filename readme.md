@@ -584,6 +584,8 @@ router := router.NewRouter()
 ```
 
 ## Response Package
+Handles HTTP error responses with a cleaner syntax.
+- Depends on the errs package from the logella library.
 
 <a href="#new">**New**</a>: Creates a new Response instance from an error. Wrap your error with a status code using errs.Wrap.
 
@@ -600,9 +602,21 @@ router := router.NewRouter()
 <a href="#send">**Send**</a>: Finalizes the chain. Writes the JSON response and status code to the http.ResponseWriter.
 
 ### Use Case
+- The err parameter must be of type errs.Error from the logella errs package (e.g., created with errs.Wrap).
 
+#### From external error
 ```go
 response.New(errs.Wrap(errors.New("some error"), http.StatusBadRequest)).
+		Req("123").
+		User("12345").
+		Log("LOG MESSAGE").
+		Date(&fixed).
+		Send(w)
+```
+
+#### From Internal error using logella errs package
+```go
+response.New(err, http.StatusBadRequest).
 		Req("123").
 		User("12345").
 		Log("LOG MESSAGE").
