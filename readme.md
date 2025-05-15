@@ -589,15 +589,15 @@ Handles HTTP error responses with a cleaner syntax.
 
 <a href="#new">**New**</a>: Creates a new Response instance from an error. Wrap your error with a status code using errs.Wrap.
 
-<a href="#log">**Log**</a>: Sets a log message to be included in the application log. Should come after Req and User, if present.
+<a href="#parameters-methods">**Log**</a>: Sets a log message to be included in the application log. Should come after Req and User, if present.
 
-<a href="#req">**Req**</a>: Adds the request ID to the response.>
+<a href="#parameters-methods">**Req**</a>: Adds the request ID to the response.>
 
-<a href="#user">**User**</a>: Adds the user ID to the response.
+<a href="#parameters-methods">**User**</a>: Adds the user ID to the response.
 
-<a href="#date">**Date**</a>: Sets a fixed timestamp for the response. Useful for tests or consistent logging.
+<a href="#parameters-methods">**Date**</a>: Sets a fixed timestamp for the response. Useful for tests or consistent logging.
 
-<a href="#doc">**Doc**</a>: Adds a documentation string (e.g., a URL or identifier) to the response.
+<a href="#parameters-methods">**Doc**</a>: Adds a documentation string (e.g., a URL or identifier) to the response.
 
 <a href="#send">**Send**</a>: Finalizes the chain. Writes the JSON response and status code to the http.ResponseWriter.
 
