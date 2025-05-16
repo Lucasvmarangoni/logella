@@ -22,9 +22,8 @@ func TestSendResponse_ReturnsErrorResponseOnNonErrsError(t *testing.T) {
 
 	assert.Equal(t, "Internal Server Error", resp.Status)
 	assert.Equal(t, "Invalid error type passed to response.New: expected *errs.Error. Use errs.Wrap.", resp.Error)
-	assert.Nil(t, resp.Err) 
+	assert.Nil(t, resp.Err)
 }
-
 
 func TestSendResponse_CorrectJSONAndLog(t *testing.T) {
 	var buf bytes.Buffer
@@ -48,7 +47,7 @@ func TestSendResponse_CorrectJSONAndLog(t *testing.T) {
 	result := recorder.Result()
 	defer result.Body.Close()
 
-	res := `{"error":"some error","message":"some error | ","status":"Bad Request","request_id":"123","user_id":"12345","timestamp":"2025-05-15T17:10:05-03:00"}`
+	res := `{"error":"some error","status":"Bad Request","request_id":"123","user_id":"12345","timestamp":"2025-05-15T17:10:05-03:00"}`
 
 	assert.Equal(t, http.StatusBadRequest, result.StatusCode)
 	assert.Equal(t, "application/json", result.Header.Get("Content-Type"))
@@ -62,4 +61,3 @@ func TestSendResponse_CorrectJSONAndLog(t *testing.T) {
 	assert.Contains(t, logOutput, "LOG MESSAGE • 123 • 12345")
 	assert.Contains(t, logOutput, "some error")
 }
-
