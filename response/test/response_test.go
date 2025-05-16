@@ -17,11 +17,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSendResponse_PanicOnNonErrsError(t *testing.T) {
-	assert.Panics(t, func() {
-		response.New(errors.New("plain error"))
-	}, "Expected panic when passing non-*err.Error to SendResponse")
+func TestSendResponse_ReturnsErrorResponseOnNonErrsError(t *testing.T) {
+	resp := response.New(errors.New("plain error"))
+
+	assert.Equal(t, "Internal Server Error", resp.Status)
+	assert.Equal(t, "Invalid error type passed to response.New: expected *errs.Error. Use errs.Wrap.", resp.Error)
+	assert.Nil(t, resp.Err) 
 }
+
 
 func TestSendResponse_CorrectJSONAndLog(t *testing.T) {
 	var buf bytes.Buffer
