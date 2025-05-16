@@ -587,9 +587,13 @@ router := router.NewRouter()
 Handles HTTP error responses with a cleaner syntax.
 - Depends on the errs package from the logella library.
 
+**Attention**: The errs.Error struct has a Message field, but in the response package, this field is only included in logs, not in the response body sent to the client. To include a custom message in the response body, use the Msg(msg string) method provided by the response.Response struct. 
+
 <a href="#new">**New**</a>: Creates a new Response instance from an error. Wrap your error with a status code using errs.Wrap.
 
 <a href="#parameters-methods">**Log**</a>: Sets a log message to be included in the application log. Should come after Req and User, if present.
+
+<a href="#parameters-methods">**Msg**</a>: Sets a custom message to be included in the response body. 
 
 <a href="#parameters-methods">**Req**</a>: Adds the request ID to the response.>
 
@@ -607,6 +611,7 @@ Handles HTTP error responses with a cleaner syntax.
 #### From external error
 ```go
 response.New(errs.Wrap(errors.New("some error"), http.StatusBadRequest)).
+		Msg("error msg method").
 		Req("123").
 		User("12345").
 		Log("LOG MESSAGE").
@@ -617,6 +622,7 @@ response.New(errs.Wrap(errors.New("some error"), http.StatusBadRequest)).
 #### From Internal error using logella errs package
 ```go
 response.New(err, http.StatusBadRequest).
+		Msg(errs.Unwrap(err).Message).
 		Req("123").
 		User("12345").
 		Log("LOG MESSAGE").
@@ -646,6 +652,7 @@ New(err error) *Response
 
 ```go
 (r *Response) Log(msg string) *Response
+(r *Response) Msg(msg string) *Response
 (r *Response) Req(requestID string) *Response
 (r *Response) User(userID string) *Response
 (r *Response) Date(timestamp *time.Time) *Response
