@@ -635,7 +635,7 @@ response.New(err, http.StatusBadRequest).
 type Response struct {
 	Err           error      `json:"-"`
 	Error         string     `json:"error"`
-	Message       string     `json:"message"`
+	Message       string     `json:"message,omitempty"`
 	Status        string     `json:"status"`
 	RequestID     string     `json:"request_id,omitempty"`
 	UserID        string     `json:"user_id,omitempty"`
