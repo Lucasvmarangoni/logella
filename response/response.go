@@ -25,13 +25,16 @@ type Response struct {
 func New(err error) *Response {
 	e, ok := err.(*errs.Error)
 	if !ok {
-		panic("Err must be a errs package type. Use errs.Wrap. Example errs.Wrap(error, http.StatusBadRequest)")
+		return &Response{
+			Status: "Internal Server Error",
+			Error:  "Invalid error type passed to response.New: expected *errs.Error. Use errs.Wrap.",
+		}
 	}
 	r := &Response{
 		Err: e,
 	}
 	r.Status = http.StatusText(e.Code)
-	r.Message = fmt.Sprintf("%v | %s", errs.Unwrap(r.Err).ToClient(), errs.Unwrap(r.Err).Message)
+
 	r.Error = fmt.Sprintf("%v", e.ToClient())
 	return r
 }
@@ -45,8 +48,15 @@ func (r *Response) Log(msg string) *Response {
 	if r.UserID != "" {
 		parts = append(parts, r.UserID)
 	}
-
+	if errs.Unwrap(r.Err).Message != "" {
+		parts = append(parts, "message:" + errs.Unwrap(r.Err).Message)
+	}
 	log.Error().Stack().Err(errs.Trace(r.Err).Stack()).Msgf("%s", strings.Join(parts, " • "))
+	return r
+}
+
+func (r *Response) Msg(msg string) *Response {
+	r.Message = msg
 	return r
 }
 
