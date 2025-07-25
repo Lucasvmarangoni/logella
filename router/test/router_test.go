@@ -12,7 +12,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/Lucasvmarangoni/logella/router"
-	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/httprate"
 	"github.com/stretchr/testify/assert"
 )
@@ -34,8 +34,22 @@ func handler_group(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func testRouter() chi.Router {
-	R := router.NewRouter()
+type UsersRouter struct {
+	router *router.Router
+	prefix string
+}
+
+func NewUsersRouter(
+	router *router.Router,
+) *UsersRouter {
+	return &UsersRouter{
+		router: router,
+		prefix: router.Prefix,
+	}
+}
+
+func (u *UsersRouter) testRouter() {
+	R := u.router
 	R.Route("/user", func() {
 		R.Get("/get", handler_user)
 		R.Post("/post", handler_user1)
@@ -46,14 +60,17 @@ func testRouter() chi.Router {
 			httprate.WithLimitHandler(func(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Rate limit exceeded", http.StatusTooManyRequests)
 			}),
-		))	
+		))
 		R.Post("/put", handler_user)
 	})
+}
 
+func (u *UsersRouter) testRouter1() {
+	R := u.router
 	R.Route("/user1", func() {
 		R.Get("/get1", handler_user1)
 		R.Post("/post1", handler_user)
-		R.Group(func(){
+		R.Group(func() {
 			R.Use(httprate.Limit(
 				4,
 				60*time.Minute,
@@ -61,11 +78,10 @@ func testRouter() chi.Router {
 				httprate.WithLimitHandler(func(w http.ResponseWriter, r *http.Request) {
 					http.Error(w, "Rate limit exceeded", http.StatusTooManyRequests)
 				}),
-			))	
+			))
 			R.Post("/put1", handler_group)
 		})
 	})
-	return R.Chi
 }
 
 func TestRoutes(t *testing.T) {
@@ -73,23 +89,33 @@ func TestRoutes(t *testing.T) {
 	log.Logger = zerolog.New(&buf).With().Timestamp().Logger()
 
 	tests := []struct {
-		method  string
-		url     string
+		method string
+		url    string
 	}{
 		{"GET", "/user/get"},
 		{"POST", "/user/post"},
 		{"POST", "/user/put"},
 		{"GET", "/user1/get1"},
 		{"POST", "/user1/post1"},
-		{"POST", "/user1/put1",},
+		{"POST", "/user1/put1"},
 	}
 
-	router := testRouter()
+	R := router.NewRouter()
+	router := NewUsersRouter(R)
+
+	R.Use(middleware.Logger)
+	R.Use(middleware.Recoverer)
+
+	router.testRouter()
+	// R.Group(func() {
+	router.testRouter1()
+	// })
+
 	for _, test := range tests {
-		t.Run(test.method+" "+test.url, func(t *testing.T) {			
+		t.Run(test.method+" "+test.url, func(t *testing.T) {
 			req := httptest.NewRequest(test.method, test.url, nil)
 			r := httptest.NewRecorder()
-			router.ServeHTTP(r, req)	
+			R.Chi.ServeHTTP(r, req)
 
 			expectedLog := "Mapped - Initialized: " + "(" + test.method + ")" + " " + test.url
 			assert.Contains(t, buf.String(), expectedLog)
