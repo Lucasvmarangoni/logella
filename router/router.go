@@ -34,18 +34,21 @@ func (r *Router) Route(pattern string, fn func()) chi.Router {
 	return r.Chi
 }
 
-func (r *Router) Group(fn func())  {
-    r.Chi.Group(func(gr chi.Router) {
-        r.Chi = gr       
-        if m, ok := gr.(*chi.Mux); ok {
-            r.mux = m
-        }
-        fn()
-    })
+func (r *Router) Group(fn func()) {
+	prev := r.Chi
+	r.Chi.Group(func(gr chi.Router) {
+		r.Chi = gr
+		if m, ok := gr.(*chi.Mux); ok {
+			r.mux = m
+		}
+		fn()
+	})
+	r.Chi = prev 
 }
 
+
 func (r *Router) Use(ms ...func(http.Handler) http.Handler) {
-	r.mux.Use(ms...)	
+	r.mux.Use(ms...)
 }
 
 func (r *Router) Post(pattern string, handler http.HandlerFunc) {
