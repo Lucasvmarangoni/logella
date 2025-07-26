@@ -53,15 +53,18 @@ func (u *UsersRouter) testRouter() {
 	R.Route("/user", func() {
 		R.Get("/get", handler_user)
 		R.Post("/post", handler_user1)
-		R.Use(httprate.Limit(
-			4,
-			60*time.Minute,
-			httprate.WithKeyFuncs(httprate.KeyByRealIP, httprate.KeyByEndpoint),
-			httprate.WithLimitHandler(func(w http.ResponseWriter, r *http.Request) {
-				http.Error(w, "Rate limit exceeded", http.StatusTooManyRequests)
-			}),
-		))
-		R.Post("/put", handler_user)
+
+		R.Group(func() {
+			R.Use(httprate.Limit(
+				4,
+				60*time.Minute,
+				httprate.WithKeyFuncs(httprate.KeyByRealIP, httprate.KeyByEndpoint),
+				httprate.WithLimitHandler(func(w http.ResponseWriter, r *http.Request) {
+					http.Error(w, "Rate limit exceeded", http.StatusTooManyRequests)
+				}),
+			))
+			R.Post("/put", handler_user)
+		})
 	})
 }
 
@@ -103,13 +106,11 @@ func TestRoutes(t *testing.T) {
 	R := router.NewRouter()
 	router := NewUsersRouter(R)
 
-	R.Use(middleware.Logger)
-	R.Use(middleware.Recoverer)
-
+	R.Use(middleware.Logger, middleware.Recoverer)
 	router.testRouter()
-	// R.Group(func() {
-	router.testRouter1()
-	// })
+	R.Group(func() {
+		router.testRouter1()
+	})
 
 	for _, test := range tests {
 		t.Run(test.method+" "+test.url, func(t *testing.T) {
